@@ -10,6 +10,8 @@
   --land-selected: #f5a524;
   --accent: #f5a524;
   --accent-pressed: #d98e14;
+  --belligerent: #d84a5c;
+  --belligerent-hover: #e96a79;
 
   font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
   line-height: 1.5;
@@ -41,6 +43,7 @@ body {
 
 .app-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   gap: 16px;
   padding: 14px 24px;
@@ -74,6 +77,35 @@ body {
   background: #182543;
   color: var(--text);
   cursor: pointer;
+}
+
+.mode-toggle {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #0d1729;
+}
+
+.mode-button {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mode-button:hover {
+  color: var(--text);
+}
+
+.mode-button[aria-pressed="true"] {
+  background: var(--accent);
+  color: #1a1205;
 }
 
 .settings-button:hover {
@@ -232,6 +264,15 @@ body {
   fill: #ffc45e;
 }
 
+.country.belligerent {
+  fill: var(--belligerent);
+}
+
+.country.belligerent.hovered,
+.country.belligerent:hover {
+  fill: var(--belligerent-hover);
+}
+
 .country-label {
   fill: #ffffff;
   font-size: 13px;
@@ -323,6 +364,27 @@ body {
 
 .chip span {
   color: var(--muted);
+}
+
+.role-badge {
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.role-belligerent {
+  border: 1px solid rgba(216, 74, 92, 0.5);
+  background: rgba(216, 74, 92, 0.18);
+  color: #f08a96;
+}
+
+.role-party {
+  border: 1px solid rgba(96, 165, 250, 0.4);
+  background: rgba(96, 165, 250, 0.14);
+  color: #7fb2f7;
 }
 
 .pairings {

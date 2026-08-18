@@ -2,7 +2,10 @@ import { useMemo, useState } from "react"
 import SelectionPanel, { type PairingStatus } from "./components/SelectionPanel"
 import SettingsModal from "./components/SettingsModal"
 import WorldMap from "./components/WorldMap"
+import ConflictSelectionPanel from "./components/ConflictSelectionPanel"
 import type { Country } from "./domain/country"
+import { belligerents, CONFLICT_LIMIT } from "./domain/conflict"
+import { BILATERAL_MODE, CONFLICT_MODE, type SimulationMode } from "./domain/mode"
 import { pairingId, pairingsFor } from "./domain/pairing"
 import { SELECTION_LIMIT, toggleCountry } from "./domain/selection"
 import { fetchFriendliness } from "./llm/friendliness"
@@ -19,12 +22,19 @@ import OverallVerdictTile from "./components/OverallVerdictTile"
 import TriangleDiagram from "./components/TriangleDiagram"
 
 export default function App() {
+  const [mode, setMode] = useState<SimulationMode>(BILATERAL_MODE)
   const [selected, setSelected] = useState<readonly Country[]>([])
   const [settings, setSettings] = useState<Settings>(() => loadSettings(getLocalStorage()))
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [pairingStatuses, setPairingStatuses] = useState<Readonly<Record<string, PairingStatus>>>({})
   const [simulationMaximized, setSimulationMaximized] = useState(false)
-  const pairings = useMemo(() => pairingsFor(selected), [selected])
+
+  const isBilateral = mode === BILATERAL_MODE
+  const pairings = useMemo(() => (isBilateral ? pairingsFor(selected) : []), [isBilateral, selected])
+  const belligerentIds = useMemo(
+    () => (isBilateral ? undefined : new Set(belligerents(selected).map((c) => c.id))),
+    [isBilateral, selected],
+  )
 
   // Every scored Pairing gets its 50-Round story computed instantly, in full.
   const simulations = useMemo(
@@ -42,11 +52,14 @@ export default function App() {
     selected.length === SELECTION_LIMIT && simulations.length === pairings.length
 
   // A new selection starts a fresh run — stale scores from other Pairings
-  // must not linger.
+  // must not linger. Each mode caps its selection differently.
   const toggle = (country: Country) => {
-    setSelected(toggleCountry(selected, country))
+    setSelected(toggleCountry(selected, country, isBilateral ? SELECTION_LIMIT : CONFLICT_LIMIT))
     setPairingStatuses({})
   }
+
+  // Ticket 08 wires this up: one payoff-parameter LLM call per party.
+  const runConflictAnalysis = () => {}
 
   const runSimulation = () => {
     const storage = getLocalStorage()
@@ -74,7 +87,33 @@ export default function App() {
     <div className="app">
       <header className="app-header">
         <h1>Geo GameSim</h1>
-        <p>Pick 2–3 countries and simulate how their relationships play out.</p>
+        <div
+          className="mode-toggle"
+          role="group"
+          aria-label="Simulation mode"
+        >
+          <button
+            type="button"
+            className="mode-button"
+            aria-pressed={mode === BILATERAL_MODE}
+            onClick={() => setMode(BILATERAL_MODE)}
+          >
+            Bilateral Sim
+          </button>
+          <button
+            type="button"
+            className="mode-button"
+            aria-pressed={mode === CONFLICT_MODE}
+            onClick={() => setMode(CONFLICT_MODE)}
+          >
+            Conflict Scenario
+          </button>
+        </div>
+        <p>
+          {isBilateral
+            ? "Pick 2–3 countries and simulate how their relationships play out."
+            : "Pick two belligerents and add parties to analyze a conflict scenario."}
+        </p>
         <button
           type="button"
           className="settings-button"
@@ -89,8 +128,12 @@ export default function App() {
       </header>
       <main className="app-main">
         <div className={simulationMaximized ? "stage stage-maximized" : "stage"}>
-          <WorldMap selected={selected} onToggleCountry={toggle} />
-          {simulations.length > 0 && (
+          <WorldMap
+            selected={selected}
+            onToggleCountry={toggle}
+            belligerentIds={belligerentIds}
+          />
+          {isBilateral && simulations.length > 0 && (
             <section className="simulation-stage" aria-label="Simulations">
               <div className="simulation-header">
                 <h2>Simulations</h2>
@@ -124,13 +167,21 @@ export default function App() {
             </section>
           )}
         </div>
-        <SelectionPanel
-          selected={selected}
-          pairings={pairings}
-          statuses={pairingStatuses}
-          onDeselect={toggle}
-          onRunSimulation={runSimulation}
-        />
+        {isBilateral ? (
+          <SelectionPanel
+            selected={selected}
+            pairings={pairings}
+            statuses={pairingStatuses}
+            onDeselect={toggle}
+            onRunSimulation={runSimulation}
+          />
+        ) : (
+          <ConflictSelectionPanel
+            selected={selected}
+            onDeselect={toggle}
+            onRunAnalysis={runConflictAnalysis}
+          />
+        )}
       </main>
       {settingsOpen && (
         <SettingsModal

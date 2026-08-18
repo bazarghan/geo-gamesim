@@ -26,4 +26,13 @@ describe("App", () => {
     expect(html).not.toContain("Clear cached results")
     expect(html).not.toContain("Base URL")
   })
+
+  it("renders a header toggle that defaults to the bilateral sim", () => {
+    const html = renderToString(<App />)
+
+    expect(html).toContain("Bilateral Sim")
+    expect(html).toContain("Conflict Scenario")
+    expect(html.match(/aria-pressed="true"/g)).toHaveLength(1)
+    expect(html).not.toContain("Run Conflict Analysis")
+  })
 })

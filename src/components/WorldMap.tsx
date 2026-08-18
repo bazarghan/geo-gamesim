@@ -25,9 +25,10 @@ const renderedCountries: readonly RenderedCountry[] = countryFeatures.map((featu
 type WorldMapProps = {
   readonly selected: readonly Country[]
   readonly onToggleCountry: (country: Country) => void
+  readonly belligerentIds?: ReadonlySet<string>
 }
 
-export default function WorldMap({ selected, onToggleCountry }: WorldMapProps) {
+export default function WorldMap({ selected, onToggleCountry, belligerentIds }: WorldMapProps) {
   const [hovered, setHovered] = useState<Country | null>(null)
   const [cursor, setCursor] = useState<PlanarPoint>([0, 0])
 
@@ -48,6 +49,7 @@ export default function WorldMap({ selected, onToggleCountry }: WorldMapProps) {
         {renderedCountries.map(({ country, d }) => {
           const classes = ["country"]
           if (isSelected(selected, country)) classes.push("selected")
+          if (belligerentIds?.has(country.id)) classes.push("belligerent")
           if (hovered?.id === country.id) classes.push("hovered")
           return (
             <path

@@ -1,19 +1,21 @@
 import type { Country } from "./country"
 
-/** Maximum number of countries a simulation accepts. */
+/** Maximum number of countries a bilateral simulation accepts. */
 export const SELECTION_LIMIT = 3
 
 /**
  * Toggle a country in the selection. Selecting an already-selected country
- * deselects it; selecting a fourth country while full is ignored.
+ * deselects it; selecting when full up to `limit` is ignored. Bilateral
+ * selections use the default limit of {@link SELECTION_LIMIT}.
  */
 export function toggleCountry(
   selected: readonly Country[],
   country: Country,
+  limit: number = SELECTION_LIMIT,
 ): readonly Country[] {
   const withoutCountry = selected.filter((c) => c.id !== country.id)
   if (withoutCountry.length !== selected.length) return withoutCountry
-  if (selected.length >= SELECTION_LIMIT) return selected
+  if (selected.length >= limit) return selected
   return [...selected, country]
 }
 
