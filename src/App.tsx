@@ -12,6 +12,8 @@ import {
   saveCachedResult,
 } from "./llm/scoreCache"
 import { getLocalStorage, loadSettings, saveSettings, type Settings } from "./settings/settings"
+import { simulate } from "./sim/engine"
+import PairingPlayback from "./components/PairingPlayback"
 
 export default function App() {
   const [selected, setSelected] = useState<readonly Country[]>([])
@@ -19,6 +21,16 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [pairingStatuses, setPairingStatuses] = useState<Readonly<Record<string, PairingStatus>>>({})
   const pairings = useMemo(() => pairingsFor(selected), [selected])
+
+  // Every scored Pairing gets its 50-Round story computed instantly, in full.
+  const simulations = useMemo(
+    () =>
+      pairings.flatMap((pairing) => {
+        const status = pairingStatuses[pairingId(pairing)]
+        return status?.state === "done" ? [simulate(pairing, status.result.score)] : []
+      }),
+    [pairings, pairingStatuses],
+  )
 
   // A new selection starts a fresh run — stale scores from other Pairings
   // must not linger.
@@ -67,7 +79,17 @@ export default function App() {
         </button>
       </header>
       <main className="app-main">
-        <WorldMap selected={selected} onToggleCountry={toggle} />
+        <div className="stage">
+          <WorldMap selected={selected} onToggleCountry={toggle} />
+          {simulations.length > 0 && (
+            <section className="simulation-stage" aria-label="Simulations">
+              <h2>Simulations</h2>
+              {simulations.map((simulation) => (
+                <PairingPlayback key={pairingId(simulation.pairing)} simulation={simulation} />
+              ))}
+            </section>
+          )}
+        </div>
         <SelectionPanel
           selected={selected}
           pairings={pairings}
