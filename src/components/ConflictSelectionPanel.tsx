@@ -30,20 +30,20 @@ export default function ConflictSelectionPanel({
 }: ConflictSelectionPanelProps) {
   return (
     <aside className="selection-panel">
-      <h2>Conflict Scenario</h2>
+      <h2>سناریوی درگیری</h2>
       <p className="selection-count">
-        {selected.length} of {CONFLICT_LIMIT} countries
+        {selected.length} از {CONFLICT_LIMIT} کشور
       </p>
 
       {selected.length === 0 && (
-        <p className="hint">Pick two belligerents, then add parties that may pick a side.</p>
+        <p className="hint">دو طرف درگیر را انتخاب کنید، سپس طرف‌هایی که ممکن است جانب یکی را بگیرند اضافه کنید.</p>
       )}
-      {selected.length === 1 && <p className="hint">Pick one more belligerent.</p>}
+      {selected.length === 1 && <p className="hint">یک طرف درگیر دیگر انتخاب کنید.</p>}
       {selected.length === BELLIGERENT_COUNT && (
-        <p className="hint">Pick at least one more party to run a conflict analysis.</p>
+        <p className="hint">برای اجرای تحلیل درگیری حداقل یک طرف دیگر اضافه کنید.</p>
       )}
       {selected.length >= CONFLICT_LIMIT && (
-        <p className="hint">Selection is full — click a selected country to swap it out.</p>
+        <p className="hint">انتخاب کامل است — برای جایگزینی روی یک کشور انتخاب‌شده کلیک کنید.</p>
       )}
 
       <ul className="chips">
@@ -56,17 +56,17 @@ export default function ConflictSelectionPanel({
                 type="button"
                 className="chip"
                 onClick={() => onDeselect(country)}
-                aria-label={`Deselect ${country.name}`}
+                aria-label={`حذف ${country.name}`}
               >
                 {country.name}
                 <span className={`role-badge role-${role}`}>
-                  {role === "belligerent" ? "Belligerent" : "Party"}
+                  {role === "belligerent" ? "طرف درگیر" : "طرف"}
                 </span>
                 <span aria-hidden="true">×</span>
               </button>
               {status?.state === "loading" && (
                 <p className="pairing-status" role="status">
-                  Asking the model…
+                  در حال پرسش از مدل…
                 </p>
               )}
               {status?.state === "done" && (
@@ -77,10 +77,10 @@ export default function ConflictSelectionPanel({
                       {status.result.parameters.affinitySideB}
                     </span>
                     <span>
-                      Neutral: {status.result.parameters.neutralityValue} · Power:{" "}
+                      بی‌طرفی: {status.result.parameters.neutralityValue} · قدرت:{" "}
                       {status.result.parameters.powerWeight}
                     </span>
-                    {status.cached && <span className="cached-badge">cached</span>}
+                    {status.cached && <span className="cached-badge">از حافظه</span>}
                   </p>
                   <p className="pairing-rationale">{status.result.rationale}</p>
                 </div>
@@ -93,7 +93,7 @@ export default function ConflictSelectionPanel({
                     className="retry-button"
                     onClick={() => onRetryParty(country)}
                   >
-                    Retry
+                    تلاش مجدد
                   </button>
                 </div>
               )}
@@ -108,7 +108,7 @@ export default function ConflictSelectionPanel({
         disabled={!canRunConflictAnalysis(selected)}
         onClick={onRunAnalysis}
       >
-        Run Conflict Analysis
+        اجرای تحلیل درگیری
       </button>
     </aside>
   )

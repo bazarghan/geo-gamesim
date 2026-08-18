@@ -1,0 +1,9 @@
+services:
+  geo-gamesim:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: geo-gamesim
+    restart: unless-stopped
+    ports:
+      - "${PORT:-42400}:42400"

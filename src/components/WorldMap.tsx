@@ -43,7 +43,7 @@ export default function WorldMap({ selected, onToggleCountry, belligerentIds }: 
       <svg
         viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
         role="img"
-        aria-label="World map — click countries to select them"
+        aria-label="نقشه جهان — برای انتخاب کشورها روی آن‌ها کلیک کنید"
       >
         <path className="ocean" d={mapPath({ type: "Sphere" }) ?? ""} />
         {renderedCountries.map(({ country, d }) => {

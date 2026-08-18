@@ -84,19 +84,21 @@ export default function App() {
     setSelected(toggleCountry(selected, country, isBilateral ? SELECTION_LIMIT : CONFLICT_LIMIT))
     setPairingStatuses({})
     setConflictStatuses({})
+    setSimulationMaximized(false)
   }
 
   // Ticket 08: one payoff-parameter LLM call per party in the scenario,
   // cached per (model, scenario, party) and retried per party on demand.
   const runConflictAnalysis = () => {
+    setSimulationMaximized(true)
     const storage = getLocalStorage()
     const scenario = scenarioKey(selected.map((c) => c.id))
-    const context = `The two belligerents are ${belligerents(selected)
+    const context = `دو طرف درگیر، ${belligerents(selected)
       .map((c) => c.name)
-      .join(" and ")}. Other parties involved: ${selected
+      .join(" و ")} هستند. سایر طرف‌های درگیر: ${selected
       .slice(BELLIGERENT_COUNT)
       .map((c) => c.name)
-      .join(", ") || "none"}.`
+      .join("، ") || "هیچ"}.`
 
     for (const country of selected) {
       const cached = getCachedPayoff(storage, settings.model, scenario, country.id)
@@ -124,12 +126,12 @@ export default function App() {
   const retryParty = (country: Country) => {
     const storage = getLocalStorage()
     const scenario = scenarioKey(selected.map((c) => c.id))
-    const context = `The two belligerents are ${belligerents(selected)
+    const context = `دو طرف درگیر، ${belligerents(selected)
       .map((c) => c.name)
-      .join(" and ")}. Other parties involved: ${selected
+      .join(" و ")} هستند. سایر طرف‌های درگیر: ${selected
       .slice(BELLIGERENT_COUNT)
       .map((c) => c.name)
-      .join(", ") || "none"}.`
+      .join("، ") || "هیچ"}.`
 
     setConflictStatuses((prev) => ({ ...prev, [country.id]: { state: "loading" } }))
     void fetchPayoffParameters(settings, country.name, context).then((outcome) => {
@@ -144,6 +146,7 @@ export default function App() {
   }
 
   const runSimulation = () => {
+    setSimulationMaximized(true)
     const storage = getLocalStorage()
     for (const pairing of pairings) {
       const key = pairingId(pairing)
@@ -168,38 +171,44 @@ export default function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Geo GameSim</h1>
+        <h1>شبیه‌ساز ژئوپلیتیک</h1>
         <div
           className="mode-toggle"
           role="group"
-          aria-label="Simulation mode"
+          aria-label="حالت شبیه‌سازی"
         >
           <button
             type="button"
             className="mode-button"
             aria-pressed={mode === BILATERAL_MODE}
-            onClick={() => setMode(BILATERAL_MODE)}
+            onClick={() => {
+              setMode(BILATERAL_MODE)
+              setSimulationMaximized(false)
+            }}
           >
-            Bilateral Sim
+            شبیه‌سازی دوجانبه
           </button>
           <button
             type="button"
             className="mode-button"
             aria-pressed={mode === CONFLICT_MODE}
-            onClick={() => setMode(CONFLICT_MODE)}
+            onClick={() => {
+              setMode(CONFLICT_MODE)
+              setSimulationMaximized(false)
+            }}
           >
-            Conflict Scenario
+            سناریوی درگیری
           </button>
         </div>
         <p>
           {isBilateral
-            ? "Pick 2–3 countries and simulate how their relationships play out."
-            : "Pick two belligerents and add parties to analyze a conflict scenario."}
+            ? "۲ تا ۳ کشور انتخاب کنید تا روند روابطشان شبیه‌سازی شود."
+            : "دو طرف درگیر را انتخاب کرده و طرف‌های دیگر را برای تحلیل یک سناریوی درگیری اضافه کنید."}
         </p>
         <button
           type="button"
           className="settings-button"
-          aria-label="Settings"
+          aria-label="تنظیمات"
           aria-expanded={settingsOpen}
           onClick={() => setSettingsOpen((open) => !open)}
         >
@@ -216,16 +225,16 @@ export default function App() {
             belligerentIds={belligerentIds}
           />
           {isBilateral && simulations.length > 0 && (
-            <section className="simulation-stage" aria-label="Simulations">
+            <section className="simulation-stage" aria-label="شبیه‌سازی‌ها">
               <div className="simulation-header">
-                <h2>Simulations</h2>
+                <h2>شبیه‌سازی‌ها</h2>
                 <button
                   type="button"
                   className="expand-button"
                   aria-pressed={simulationMaximized}
                   onClick={() => setSimulationMaximized((maximized) => !maximized)}
                 >
-                  {simulationMaximized ? "Minimize" : "Maximize"}
+                  {simulationMaximized ? "کوچک کردن" : "بزرگ کردن"}
                 </button>
               </div>
               {fullRun && (
@@ -249,7 +258,12 @@ export default function App() {
             </section>
           )}
           {!isBilateral && conflictAnalysisDone && (
-            <AnalysisResultsScreen countries={selected} results={conflictResults} />
+            <AnalysisResultsScreen
+              countries={selected}
+              results={conflictResults}
+              maximized={simulationMaximized}
+              onToggleMaximize={() => setSimulationMaximized((maximized) => !maximized)}
+            />
           )}
         </div>
         {isBilateral ? (

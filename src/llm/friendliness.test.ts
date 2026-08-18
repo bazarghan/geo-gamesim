@@ -101,7 +101,7 @@ describe("fetchFriendliness validation before any request", () => {
     )
 
     expect(outcome.ok).toBe(false)
-    if (!outcome.ok) expect(outcome.error).toContain("API key")
+    if (!outcome.ok) expect(outcome.error).toContain("کلید API")
     expect(requests).toHaveLength(0)
   })
 
@@ -115,7 +115,7 @@ describe("fetchFriendliness validation before any request", () => {
     )
 
     expect(outcome.ok).toBe(false)
-    if (!outcome.ok) expect(outcome.error).toContain("model")
+    if (!outcome.ok) expect(outcome.error).toContain("مدل")
     expect(requests).toHaveLength(0)
   })
 
@@ -129,7 +129,7 @@ describe("fetchFriendliness validation before any request", () => {
     )
 
     expect(outcome.ok).toBe(false)
-    if (!outcome.ok) expect(outcome.error).toContain("base URL")
+    if (!outcome.ok) expect(outcome.error).toContain("آدرس پایه")
     expect(requests).toHaveLength(0)
   })
 })
@@ -159,7 +159,7 @@ describe("fetchFriendliness failure reporting", () => {
     const outcome = await fetchFriendliness(settings, pairingOf(iran, france), fetch)
 
     expect(outcome.ok).toBe(false)
-    if (!outcome.ok) expect(outcome.error).toContain("Could not reach")
+    if (!outcome.ok) expect(outcome.error).toContain("دسترسی به")
   })
 
   it("never leaks the API key in any error message", async () => {

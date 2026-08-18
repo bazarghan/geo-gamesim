@@ -6,9 +6,9 @@ describe("App", () => {
   it("renders the map, every selectable country, and a disabled Run Simulation button", () => {
     const html = renderToString(<App />)
 
-    expect(html).toContain("Geo GameSim")
-    expect(html).toContain("World map")
-    expect(html).toContain("Run Simulation")
+    expect(html).toContain("شبیه‌ساز ژئوپلیتیک")
+    expect(html).toContain("نقشه جهان")
+    expect(html).toContain("اجرای شبیه‌سازی")
     expect(html).toContain("disabled")
 
     // One path per Natural Earth 110m country minus Antarctica
@@ -22,17 +22,17 @@ describe("App", () => {
   it("renders the settings gear but keeps the settings modal closed", () => {
     const html = renderToString(<App />)
 
-    expect(html).toContain('aria-label="Settings"')
-    expect(html).not.toContain("Clear cached results")
-    expect(html).not.toContain("Base URL")
+    expect(html).toContain('aria-label="تنظیمات"')
+    expect(html).not.toContain("پاک کردن نتایج حافظه")
+    expect(html).not.toContain("آدرس پایه")
   })
 
   it("renders a header toggle that defaults to the bilateral sim", () => {
     const html = renderToString(<App />)
 
-    expect(html).toContain("Bilateral Sim")
-    expect(html).toContain("Conflict Scenario")
+    expect(html).toContain("شبیه‌سازی دوجانبه")
+    expect(html).toContain("سناریوی درگیری")
     expect(html.match(/aria-pressed="true"/g)).toHaveLength(1)
-    expect(html).not.toContain("Run Conflict Analysis")
+    expect(html).not.toContain("اجرای تحلیل درگیری")
   })
 })

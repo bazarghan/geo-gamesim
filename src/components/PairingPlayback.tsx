@@ -12,6 +12,7 @@ import {
 } from "recharts"
 import { ROUND_COUNT, type Simulation } from "../sim/engine"
 import { OUTCOME_COLORS, detailFor, trajectoryData, type TrajectoryDatum } from "../sim/trajectory"
+import { archetypeLabel, outcomeLabel, verdictLabel } from "../i18n"
 
 /** Playback speeds, slowest to fastest — milliseconds of story per Round. */
 const SPEEDS = [
@@ -67,18 +68,18 @@ export default function PairingPlayback({ simulation, rationale }: PairingPlayba
   }
 
   return (
-    <article className="playback-card" aria-label={`Simulation playback for ${left.name} and ${right.name}`}>
+    <article className="playback-card" aria-label={`پخش شبیه‌سازی برای ${left.name} و ${right.name}`}>
       <header className="playback-header">
         <div>
           <h3 className="playback-name">
             {left.name} — {right.name}
           </h3>
           <p className="playback-score">
-            Initial score {simulation.initialScore} · final {simulation.finalScore}
+            امتیاز اولیه {simulation.initialScore} · نهایی {simulation.finalScore}
           </p>
         </div>
         <span className={`verdict-badge verdict-${simulation.verdict.toLowerCase().replaceAll(" ", "-")}`}>
-          {simulation.verdict}
+          {verdictLabel(simulation.verdict)}
         </span>
       </header>
 
@@ -122,8 +123,9 @@ export default function PairingPlayback({ simulation, rationale }: PairingPlayba
       </div>
 
       <p className="playback-round" role="status">
-        Round {currentRound}/{ROUND_COUNT} — {detailFor(simulation, round)} · score {round.scoreAfter} ·{" "}
-        {round.archetype} · {left.name} {round.leftTotal} pts, {right.name} {round.rightTotal} pts
+        دور {currentRound}/{ROUND_COUNT} — {detailFor(simulation, round)} · امتیاز {round.scoreAfter} ·{" "}
+        {archetypeLabel(round.archetype)} · {left.name} {round.leftTotal} امتیاز، {right.name}{" "}
+        {round.rightTotal} امتیاز
       </p>
 
       <div className="playback-controls">
@@ -131,18 +133,18 @@ export default function PairingPlayback({ simulation, rationale }: PairingPlayba
           type="button"
           className="play-button"
           onClick={togglePlay}
-          aria-label={playingNow ? "Pause playback" : atEnd ? "Replay playback" : "Play playback"}
+          aria-label={playingNow ? "توقف پخش" : atEnd ? "پخش مجدد" : "پخش"}
         >
-          {playingNow ? "Pause" : atEnd ? "Replay" : "Play"}
+          {playingNow ? "توقف" : atEnd ? "پخش مجدد" : "پخش"}
         </button>
-        <button type="button" className="ghost-button" onClick={reset} aria-label="Reset playback">
-          Reset
+        <button type="button" className="ghost-button" onClick={reset} aria-label="بازنشانی پخش">
+          بازنشانی
         </button>
         <label className="speed-label">
-          Speed
+          سرعت
           <select
             className="speed-select"
-            aria-label="Playback speed"
+            aria-label="سرعت پخش"
             value={speedIndex}
             onChange={(event) => setSpeedIndex(Number(event.target.value))}
           >
@@ -160,15 +162,18 @@ export default function PairingPlayback({ simulation, rationale }: PairingPlayba
           max={ROUND_COUNT}
           step={1}
           value={currentRound}
-          aria-label="Round scrubber"
+          aria-label="مرور دورها"
           onChange={(event) => setCurrentRound(Number(event.target.value))}
         />
       </div>
 
       <p className="playback-legend">
-        <span className="legend-dot" style={{ background: OUTCOME_COLORS["mutual cooperation"] }} /> mutual cooperation
-        <span className="legend-dot" style={{ background: OUTCOME_COLORS.mixed }} /> mixed
-        <span className="legend-dot" style={{ background: OUTCOME_COLORS["mutual defection"] }} /> mutual defection
+        <span className="legend-dot" style={{ background: OUTCOME_COLORS["mutual cooperation"] }} />
+        {outcomeLabel("mutual cooperation")}
+        <span className="legend-dot" style={{ background: OUTCOME_COLORS.mixed }} />
+        {outcomeLabel("mixed")}
+        <span className="legend-dot" style={{ background: OUTCOME_COLORS["mutual defection"] }} />
+        {outcomeLabel("mutual defection")}
       </p>
     </article>
   )
@@ -185,9 +190,9 @@ function roundTooltip(props: RoundTooltipProps) {
   if (!datum) return null
   return (
     <div className="round-tooltip">
-      <p className="round-tooltip-title">Round {datum.round}</p>
+      <p className="round-tooltip-title">دور {datum.round}</p>
       <p>{datum.detail}</p>
-      <p>Score {datum.score}</p>
+      <p>امتیاز {datum.score}</p>
     </div>
   )
 }

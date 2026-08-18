@@ -16,12 +16,12 @@ describe("SettingsModal", () => {
       />,
     )
 
-    expect(html).toContain("Base URL")
-    expect(html).toContain("API key")
-    expect(html).toContain("Model name")
+    expect(html).toContain("آدرس پایه")
+    expect(html).toContain("کلید API")
+    expect(html).toContain("نام مدل")
     expect(html).toContain(DEFAULT_BASE_URL)
-    expect(html).toContain("Clear cached results")
-    expect(html).toContain("Save")
+    expect(html).toContain("پاک کردن نتایج حافظه")
+    expect(html).toContain("ذخیره")
   })
 
   it("masks the API key input and shows no saved feedback before saving", () => {
@@ -36,6 +36,6 @@ describe("SettingsModal", () => {
 
     expect(html).toContain('type="password"')
     expect(html).toContain('autoComplete="off"')
-    expect(html).not.toContain("Settings saved")
+    expect(html).not.toContain("تنظیمات ذخیره شد")
   })
 })

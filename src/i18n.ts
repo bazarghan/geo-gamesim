@@ -1,0 +1,237 @@
+/** Persian (فارسی) display labels for domain values rendered in the UI. */
+
+export const VERDICT_LABELS: Readonly<Record<string, string>> = {
+  PEACE: "آرامش",
+  "COLD WAR": "جنگ سرد",
+  WAR: "جنگ",
+  TENSION: "تنش",
+}
+
+/** A Pairing Verdict (e.g. "PEACE") as a Persian label. */
+export function verdictLabel(verdict: string): string {
+  return VERDICT_LABELS[verdict] ?? verdict
+}
+
+export const ARCHETYPE_LABELS: Readonly<Record<string, string>> = {
+  Aggressive: "متهاجم",
+  Suspicious: "مشکوک",
+  Reciprocator: "متقابل",
+  "Cautious Cooperator": "همکار محتاط",
+  "Loyal Ally": "متحد وفادار",
+}
+
+/** A Strategy Archetype (e.g. "Aggressive") as a Persian label. */
+export function archetypeLabel(archetype: string): string {
+  return ARCHETYPE_LABELS[archetype] ?? archetype
+}
+
+export const ALIGNMENT_LABELS: Readonly<Record<string, string>> = {
+  "SIDE A": "سمت A",
+  "SIDE B": "سمت B",
+  NEUTRAL: "بی‌طرف",
+}
+
+/** An Alignment (e.g. "SIDE A") as a Persian label. */
+export function alignmentLabel(alignment: string): string {
+  return ALIGNMENT_LABELS[alignment] ?? alignment
+}
+
+export const OUTCOME_LABELS: Readonly<Record<string, string>> = {
+  "mutual cooperation": "همکاری دوجانبه",
+  mixed: "مختلط",
+  "mutual defection": "تخلف دوجانبه",
+}
+
+/** A Round outcome (e.g. "mutual cooperation") as a Persian label. */
+export function outcomeLabel(outcome: string): string {
+  return OUTCOME_LABELS[outcome] ?? outcome
+}
+
+/** The Persian verb for a Move in the round readout/tooltip. */
+export function moveVerb(move: string): string {
+  return move === "cooperate" ? "همکاری می‌کند" : "تخلف می‌کند"
+}
+
+export const COUNTRY_NAMES_FA: Readonly<Record<string, string>> = {
+  Afghanistan: "افغانستان",
+  Albania: "آلبانی",
+  Algeria: "الجزایر",
+  Angola: "آنگولا",
+  Argentina: "آرژانتین",
+  Armenia: "ارمنستان",
+  Australia: "استرالیا",
+  Austria: "اتریش",
+  Azerbaijan: "آذربایجان",
+  Bahamas: "باهاما",
+  Bangladesh: "بنگلادش",
+  Belarus: "بلاروس",
+  Belgium: "بلژیک",
+  Belize: "بلیز",
+  Benin: "بنین",
+  Bhutan: "بوتان",
+  Bolivia: "بولیوی",
+  "Bosnia and Herz.": "بوسنی و هرزگوین",
+  Botswana: "بوتسوانا",
+  Brazil: "برزیل",
+  Brunei: "برونئی",
+  Bulgaria: "بلغارستان",
+  "Burkina Faso": "بورکینافاسو",
+  Burundi: "بوروندی",
+  Cambodia: "کامبوج",
+  Cameroon: "کامرون",
+  Canada: "کانادا",
+  "Central African Rep.": "جمهوری آفریقای مرکزی",
+  Chad: "چاد",
+  Chile: "شیلی",
+  China: "چین",
+  Colombia: "کلمبیا",
+  Congo: "جمهوری کنگو",
+  "Costa Rica": "کاستاریکا",
+  Croatia: "کرواسی",
+  Cuba: "کوبا",
+  Cyprus: "قبرس",
+  Czechia: "جمهوری چک",
+  "Côte d'Ivoire": "ساحل عاج",
+  "Dem. Rep. Congo": "جمهوری دموکراتیک کنگو",
+  Denmark: "دانمارک",
+  Djibouti: "جیبوتی",
+  "Dominican Rep.": "جمهوری دومینیکن",
+  Ecuador: "اکوادور",
+  Egypt: "مصر",
+  "El Salvador": "السالوادور",
+  "Eq. Guinea": "گینه استوایی",
+  Eritrea: "اریتره",
+  Estonia: "استونی",
+  Ethiopia: "اتیوپی",
+  "Falkland Is.": "جزایر فالکلند",
+  Fiji: "فیجی",
+  Finland: "فنلاند",
+  "Fr. S. Antarctic Lands": "سرزمین‌های جنوبی فرانسه",
+  France: "فرانسه",
+  Gabon: "گابن",
+  Gambia: "گامبیا",
+  Georgia: "گرجستان",
+  Germany: "آلمان",
+  Ghana: "غنا",
+  Greece: "یونان",
+  Greenland: "گرینلند",
+  Guatemala: "گواتمالا",
+  Guinea: "گینه",
+  "Guinea-Bissau": "گینه بیسائو",
+  Guyana: "گویان",
+  Haiti: "هائیتی",
+  Honduras: "هندوراس",
+  Hungary: "مجارستان",
+  Iceland: "ایسلند",
+  India: "هند",
+  Indonesia: "اندونزی",
+  Iran: "ایران",
+  Iraq: "عراق",
+  Ireland: "ایرلند",
+  Israel: "اسرائیل",
+  Italy: "ایتالیا",
+  Jamaica: "جامائیکا",
+  Japan: "ژاپن",
+  Jordan: "اردن",
+  Kazakhstan: "قزاقستان",
+  Kenya: "کنیا",
+  Kosovo: "کوزوو",
+  Kuwait: "کویت",
+  Kyrgyzstan: "قرقیزستان",
+  Laos: "لائوس",
+  Latvia: "لتونی",
+  Lebanon: "لبنان",
+  Lesotho: "لسوتو",
+  Liberia: "لیبریا",
+  Libya: "لیبی",
+  Lithuania: "لیتوانی",
+  Luxembourg: "لوکزامبورگ",
+  Macedonia: "مقدونیه شمالی",
+  Madagascar: "ماداگاسکار",
+  Malawi: "مالاوی",
+  Malaysia: "مالزی",
+  Mali: "مالی",
+  Mauritania: "موریتانی",
+  Mexico: "مکزیک",
+  Moldova: "مولداوی",
+  Mongolia: "مغولستان",
+  Montenegro: "مونته‌نگرو",
+  Morocco: "مراکش",
+  Mozambique: "موزامبیک",
+  Myanmar: "میانمار",
+  "N. Cyprus": "قبرس شمالی",
+  Namibia: "نامیبیا",
+  Nepal: "نپال",
+  Netherlands: "هلند",
+  "New Caledonia": "کالدونیای جدید",
+  "New Zealand": "نیوزیلند",
+  Nicaragua: "نیکاراگوئه",
+  Niger: "نیجر",
+  Nigeria: "نیجریه",
+  "North Korea": "کره شمالی",
+  Norway: "نروژ",
+  Oman: "عمان",
+  Pakistan: "پاکستان",
+  Palestine: "فلسطین",
+  Panama: "پاناما",
+  "Papua New Guinea": "پاپوآ گینه نو",
+  Paraguay: "پاراگوئه",
+  Peru: "پرو",
+  Philippines: "فیلیپین",
+  Poland: "لهستان",
+  Portugal: "پرتغال",
+  "Puerto Rico": "پورتوریکو",
+  Qatar: "قطر",
+  Romania: "رومانی",
+  Russia: "روسیه",
+  Rwanda: "رواندا",
+  "S. Sudan": "سودان جنوبی",
+  "Saudi Arabia": "عربستان سعودی",
+  Senegal: "سنگال",
+  Serbia: "صربستان",
+  "Sierra Leone": "سیرالئون",
+  Slovakia: "اسلواکی",
+  Slovenia: "اسلوونی",
+  "Solomon Is.": "جزایر سلیمان",
+  Somalia: "سومالی",
+  Somaliland: "سومالی‌لند",
+  "South Africa": "آفریقای جنوبی",
+  "South Korea": "کره جنوبی",
+  Spain: "اسپانیا",
+  "Sri Lanka": "سری‌لانکا",
+  Sudan: "سودان",
+  Suriname: "سورینام",
+  Sweden: "سوئد",
+  Switzerland: "سوئیس",
+  Syria: "سوریه",
+  Taiwan: "تایوان",
+  Tajikistan: "تاجیکستان",
+  Tanzania: "تانزانیا",
+  Thailand: "تایلند",
+  "Timor-Leste": "تیمور شرقی",
+  Togo: "توگو",
+  "Trinidad and Tobago": "ترینیداد و توباگو",
+  Tunisia: "تونس",
+  Turkey: "ترکیه",
+  Turkmenistan: "ترکمنستان",
+  Uganda: "اوگاندا",
+  Ukraine: "اوکراین",
+  "United Arab Emirates": "امارات متحده عربی",
+  "United Kingdom": "بریتانیا",
+  "United States of America": "ایالات متحده آمریکا",
+  Uruguay: "اروگوئه",
+  Uzbekistan: "ازبکستان",
+  Vanuatu: "وانواتو",
+  Venezuela: "ونزوئلا",
+  Vietnam: "ویتنام",
+  "W. Sahara": "صحرای غربی",
+  Yemen: "یمن",
+  Zambia: "زامبیا",
+  Zimbabwe: "زیمبابوه",
+  eSwatini: "اسواتینی",
+}
+
+/** Returns the Persian name of a country if available, or the original English name. */
+export function persianCountryName(englishName: string): string {
+  return COUNTRY_NAMES_FA[englishName] ?? englishName
+}

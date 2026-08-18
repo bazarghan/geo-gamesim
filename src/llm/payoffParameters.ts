@@ -11,21 +11,21 @@ export type PayoffOutcome =
   | { readonly ok: false; readonly error: string }
 
 const SYSTEM_PROMPT =
-  "You are a geopolitical analyst. You produce payoff parameters for countries " +
-  "in a conflict and always answer with a single JSON object, nothing else."
+  "شما یک تحلیلگر ژئوپلیتیک هستید. پارامترهای بازده برای کشورها در یک درگیری " +
+  "تولید می‌کنید و همیشه فقط با یک شیء JSON پاسخ می‌دهید، نه چیز دیگری."
 
-const USER_PROMPT_TEMPLATE = `Analyze the country {country} within this conflict scenario:
+const USER_PROMPT_TEMPLATE = `کشور {country} را در این سناریوی درگیری تحلیل کن:
 {context}
 
-Produce that country's payoff parameters for the game-theoretic model:
+پارامترهای بازده این کشور را برای مدل نظریه بازی تولید کن:
 
-- affinitySideA: how closely aligned this country is with Side A, whole number 0-10
-- affinitySideB: how closely aligned this country is with Side B, whole number 0-10
-- neutralityValue: the intrinsic value this country places on staying out, whole number 0-10
-- powerWeight: how much influence this country contributes to a bloc it joins, whole number 0-10
+- affinitySideA: میزان هم‌راستی این کشور با سمت A، عدد صحیح 0-10
+- affinitySideB: میزان هم‌راستی این کشور با سمت B، عدد صحیح 0-10
+- neutralityValue: ارزش ذاتی که این کشور برای بی‌طرف ماندن قائل است، عدد صحیح 0-10
+- powerWeight: میزان نفوذی که این کشور به بلوکی که به آن می‌پیوندد می‌افزاید، عدد صحیح 0-10
 
-Respond with a single JSON object in exactly this shape:
-{{"affinitySideA": <number 0-10>, "affinitySideB": <number 0-10>, "neutralityValue": <number 0-10>, "powerWeight": <number 0-10>, "rationale": "<one sentence explaining these parameters>"}}`
+فقط با یک شیء JSON و دقیقاً به این شکل پاسخ بده:
+{{"affinitySideA": <عدد 0-10>, "affinitySideB": <عدد 0-10>, "neutralityValue": <عدد 0-10>, "powerWeight": <عدد 0-10>, "rationale": "<یک جمله به فارسی که این پارامترها را توضیح می‌دهد>"}}`
 
 /**
  * Query the configured OpenAI-compatible endpoint for one Party's Payoff
@@ -39,17 +39,17 @@ export async function fetchPayoffParameters(
   fetchFn: FetchLike = fetch,
 ): Promise<PayoffOutcome> {
   if (settings.apiKey === "") {
-    return failure("Missing API key — add one in Settings.")
+    return failure("کلید API وجود ندارد — در تنظیمات یک کلید اضافه کنید.")
   }
   if (settings.model === "") {
-    return failure("No model configured — set one in Settings.")
+    return failure("مدلی تنظیم نشده — در تنظیمات یک مدل تعیین کنید.")
   }
 
   let endpoint: string
   try {
     endpoint = chatCompletionsUrl(settings.baseUrl)
   } catch {
-    return failure(`Cannot use base URL "${settings.baseUrl}" — fix it in Settings.`)
+    return failure(`نمی‌توان از آدرس پایه «${settings.baseUrl}» استفاده کرد — آن را در تنظیمات اصلاح کنید.`)
   }
 
   let response: Response
@@ -76,11 +76,11 @@ export async function fetchPayoffParameters(
       }),
     })
   } catch {
-    return failure(`Could not reach ${endpoint} — check the base URL in Settings.`)
+    return failure(`دسترسی به ${endpoint} ممکن نشد — آدرس پایه را در تنظیمات بررسی کنید.`)
   }
 
   if (!response.ok) {
-    return failure(`API error ${response.status}: ${await apiErrorMessage(response)}`)
+    return failure(`خطای API ${response.status}: ${await apiErrorMessage(response)}`)
   }
 
   return parseContent(response)
@@ -99,7 +99,7 @@ async function parseContent(response: Response): Promise<PayoffOutcome> {
   try {
     text = await response.text()
   } catch {
-    return failure("The endpoint returned a non-JSON response body.")
+    return failure("پاسخ سرور قابل خواندن به‌صورت JSON نبود.")
   }
 
   let payload: unknown
@@ -110,13 +110,13 @@ async function parseContent(response: Response): Promise<PayoffOutcome> {
     try {
       payload = JSON.parse(fenced)
     } catch {
-      return failure("The endpoint returned a non-JSON response body.")
+      return failure("پاسخ سرور قابل خواندن به‌صورت JSON نبود.")
     }
   }
 
   const content = contentText(payload)
   if (content === null) {
-    return failure("The endpoint response had no message content.")
+    return failure("پاسخ سرور محتوای پیام نداشت.")
   }
 
   let parsed: unknown
@@ -127,20 +127,20 @@ async function parseContent(response: Response): Promise<PayoffOutcome> {
     try {
       parsed = JSON.parse(fenced)
     } catch {
-      return failure("The model did not return valid JSON — try again or switch models.")
+      return failure("مدل خروجی JSON معتبر نداد — دوباره تلاش کنید یا مدل را عوض کنید.")
     }
   }
 
   const candidate = parsed as Partial<PayoffParameters> & { rationale?: unknown }
   const fields = [candidate.affinitySideA, candidate.affinitySideB, candidate.neutralityValue]
   if (!fields.every(isFiniteNumber)) {
-    return failure("The model returned invalid parameters — try again or switch models.")
+    return failure("مدل پارامترهای نامعتبر داد — دوباره تلاش کنید یا مدل را عوض کنید.")
   }
   if (!isFiniteNumber(candidate.powerWeight)) {
-    return failure("The model returned invalid parameters — try again or switch models.")
+    return failure("مدل پارامترهای نامعتبر داد — دوباره تلاش کنید یا مدل را عوض کنید.")
   }
   if (typeof candidate.rationale !== "string" || candidate.rationale.trim() === "") {
-    return failure("The model returned an invalid rationale — try again or switch models.")
+    return failure("مدل توضیح نامعتبر داد — دوباره تلاش کنید یا مدل را عوض کنید.")
   }
 
   return {
@@ -176,9 +176,9 @@ async function apiErrorMessage(response: Response): Promise<string> {
   try {
     const body = (await response.json()) as { error?: { message?: unknown } }
     const message = body?.error?.message
-    return typeof message === "string" && message.length > 0 ? message : "request failed"
+    return typeof message === "string" && message.length > 0 ? message : "درخواست ناموفق"
   } catch {
-    return "request failed"
+    return "درخواست ناموفق"
   }
 }
 

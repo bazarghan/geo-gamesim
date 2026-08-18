@@ -13,7 +13,7 @@
   --belligerent: #d84a5c;
   --belligerent-hover: #e96a79;
 
-  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-family: "Vazirmatn", "Segoe UI", Tahoma, system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   font-size: 15px;
   color: var(--text);
@@ -64,7 +64,7 @@ body {
 }
 
 .settings-button {
-  margin-left: auto;
+  margin-inline-start: auto;
   align-self: center;
   display: inline-flex;
   align-items: center;
@@ -197,7 +197,7 @@ body {
 }
 
 .save-button {
-  margin-left: auto;
+  margin-inline-start: auto;
   padding: 9px 16px;
   border: none;
   border-radius: 8px;
@@ -302,7 +302,7 @@ body {
   width: 300px;
   flex-shrink: 0;
   padding: 20px;
-  border-left: 1px solid var(--border);
+  border-inline-start: 1px solid var(--border);
   background: var(--panel);
   overflow-y: auto;
   display: flex;
@@ -504,7 +504,8 @@ body {
   display: none;
 }
 
-.stage-maximized .simulation-stage {
+.stage-maximized .simulation-stage,
+.stage-maximized .analysis-results {
   flex: 1;
   max-height: none;
 }
@@ -773,7 +774,7 @@ body {
 }
 
 .legend-dot + .legend-dot {
-  margin-left: 10px;
+  margin-inline-start: 10px;
 }
 
 .round-tooltip {
@@ -813,7 +814,7 @@ body {
 
   .selection-panel {
     width: 100%;
-    border-left: none;
+    border-inline-start: none;
     border-top: 1px solid var(--border);
   }
 }
@@ -831,10 +832,17 @@ body {
 
 .analysis-header {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.analysis-header-info {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .analysis-header h2 {
@@ -869,7 +877,7 @@ body {
 }
 
 .alignment-table th {
-  text-align: left;
+  text-align: right;
   padding: 8px 10px;
   border-bottom: 1px solid var(--border);
   color: var(--muted);

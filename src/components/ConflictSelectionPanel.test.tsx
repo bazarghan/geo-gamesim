@@ -5,9 +5,9 @@ import type { Country } from "../domain/country"
 
 const country = (id: string, name: string): Country => ({ id, name })
 
-const iran = country("364", "Iran")
-const france = country("250", "France")
-const japan = country("392", "Japan")
+const iran = country("364", "ایران")
+const france = country("250", "فرانسه")
+const japan = country("392", "ژاپن")
 
 function panel(selected: readonly Country[], statuses = {}) {
   const html = renderToString(
@@ -26,13 +26,13 @@ describe("ConflictSelectionPanel", () => {
   it("shows the conflict cap and a disabled run button before any selection", () => {
     const html = panel([])
 
-    expect(html).toContain("0 of 10 countries")
-    expect(html).toContain("Run Conflict Analysis")
+    expect(html).toContain("0 از 10 کشور")
+    expect(html).toContain("اجرای تحلیل درگیری")
     expect(html).not.toContain("pairing-")
   })
 
   it("stays disabled until a party beyond the two belligerents is picked", () => {
-    expect(panel([iran, france])).toContain("Pick at least one more party")
+    expect(panel([iran, france])).toContain("برای اجرای تحلیل درگیری حداقل یک طرف دیگر اضافه کنید")
     expect(panel([iran, france]).match(/disabled/g)).not.toBeNull()
   })
 
@@ -43,18 +43,18 @@ describe("ConflictSelectionPanel", () => {
   it("lists selection-order roles: two belligerents first, then parties", () => {
     const html = panel([iran, france, japan])
 
-    expect(html.match(/Belligerent/g)).toHaveLength(2)
-    expect(html.match(/Party/g)).toHaveLength(1)
-    expect(html.indexOf("Iran")).toBeLessThan(html.indexOf("Belligerent"))
-    expect(html.indexOf("Japan")).toBeLessThan(html.indexOf("Party"))
+    expect(html.match(/طرف درگیر/g)).toHaveLength(2)
+    expect(html.match(/<span class="role-badge role-party">طرف<\/span>/g)).toHaveLength(1)
+    expect(html.indexOf("ایران")).toBeLessThan(html.indexOf("طرف درگیر"))
+    expect(html.indexOf("ژاپن")).toBeLessThan(html.indexOf("role-party"))
   })
 
   it("keeps labels for deselecting every selected country", () => {
     const html = panel([iran, france, japan])
 
-    expect(html).toContain('aria-label="Deselect Iran"')
-    expect(html).toContain('aria-label="Deselect France"')
-    expect(html).toContain('aria-label="Deselect Japan"')
+    expect(html).toContain('aria-label="حذف ایران"')
+    expect(html).toContain('aria-label="حذف فرانسه"')
+    expect(html).toContain('aria-label="حذف ژاپن"')
   })
 
   it("shows a loading status for a party being queried", () => {
@@ -62,7 +62,7 @@ describe("ConflictSelectionPanel", () => {
       [iran.id]: { state: "loading" },
     })
 
-    expect(html).toContain("Asking the model…")
+    expect(html).toContain("در حال پرسش از مدل…")
   })
 
   it("shows computed parameters and rationale once a party is done", () => {
@@ -72,15 +72,15 @@ describe("ConflictSelectionPanel", () => {
         cached: false,
         result: {
           parameters: { affinitySideA: 8, affinitySideB: 2, neutralityValue: 4, powerWeight: 7 },
-          rationale: "Firmly aligned with the regional bloc.",
+          rationale: "کاملاً هم‌راستا با بلوک منطقه‌ای.",
         },
       },
     })
 
     expect(html).toContain("A: 8")
     expect(html).toContain("B: 2")
-    expect(html).toContain("Power: 7")
-    expect(html).toContain("Firmly aligned with the regional bloc.")
+    expect(html).toContain("قدرت: 7")
+    expect(html).toContain("کاملاً هم‌راستا با بلوک منطقه‌ای.")
   })
 
   it("shows a cached badge when a done party came from cache", () => {
@@ -90,20 +90,20 @@ describe("ConflictSelectionPanel", () => {
         cached: true,
         result: {
           parameters: { affinitySideA: 8, affinitySideB: 2, neutralityValue: 4, powerWeight: 7 },
-          rationale: "Firmly aligned.",
+          rationale: "کاملاً هم‌راستا.",
         },
       },
     })
 
-    expect(html).toContain("cached")
+    expect(html).toContain("از حافظه")
   })
 
   it("shows an error with a retry action for a failed party", () => {
     const html = panel([iran, france, japan], {
-      [iran.id]: { state: "error", error: "API error 401: bad key" },
+      [iran.id]: { state: "error", error: "خطای API 401: bad key" },
     })
 
-    expect(html).toContain("API error 401: bad key")
-    expect(html).toContain("Retry")
+    expect(html).toContain("خطای API 401: bad key")
+    expect(html).toContain("تلاش مجدد")
   })
 })

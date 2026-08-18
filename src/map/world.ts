@@ -3,6 +3,7 @@ import type { Feature, FeatureCollection, Geometry, MultiPolygon, Polygon } from
 import type { GeometryCollection } from "topojson-specification"
 import topology from "world-atlas/countries-110m.json"
 import type { Country } from "../domain/country"
+import { persianCountryName } from "../i18n"
 
 export type CountryProperties = { name: string }
 export type CountryFeature = Feature<Polygon | MultiPolygon, CountryProperties> & { id: string }
@@ -25,12 +26,13 @@ export const countryFeatures: readonly CountryFeature[] = collection.features.fl
     const name = f.properties?.name
     if (typeof name !== "string" || EXCLUDED_COUNTRIES.has(name)) return []
     if (!isPolygonal(f.geometry)) return []
+    const faName = persianCountryName(name)
     return [
       {
         id: f.id !== undefined ? String(f.id) : `ne:${name}`,
         type: "Feature",
         geometry: f.geometry,
-        properties: { name },
+        properties: { name: faName },
       },
     ]
   },

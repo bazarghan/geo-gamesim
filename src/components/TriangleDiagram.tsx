@@ -2,6 +2,7 @@ import type { Country } from "../domain/country"
 import { pairingId, pairingOf } from "../domain/pairing"
 import type { Simulation } from "../sim/engine"
 import { VERDICT_COLORS } from "../sim/aggregate"
+import { verdictLabel } from "../i18n"
 
 type TriangleDiagramProps = {
   readonly countries: readonly Country[]
@@ -50,7 +51,7 @@ export default function TriangleDiagram({ countries, simulations }: TriangleDiag
       className="triangle-diagram"
       viewBox="0 0 320 272"
       role="img"
-      aria-label="Triangle of the three selected countries with edges colored by Pairing Verdict"
+      aria-label="مثلث سه کشور انتخاب‌شده با یال‌هایی که رنگشان وابسته به داوری هر جفت است"
     >
       {EDGES.map((edge, index) => {
         const from = VERTICES[edge.from]
@@ -64,7 +65,7 @@ export default function TriangleDiagram({ countries, simulations }: TriangleDiag
         const mid = { x: (from.x + to.x) / 2 + offset.dx, y: (from.y + to.y) / 2 + offset.dy }
         return (
           <g key={`${edge.from}-${edge.to}`}>
-            <title>{`${simulation.pairing.left.name} — ${simulation.pairing.right.name}: ${simulation.verdict}`}</title>
+            <title>{`${simulation.pairing.left.name} — ${simulation.pairing.right.name}: ${verdictLabel(simulation.verdict)}`}</title>
             <line
               x1={from.x}
               y1={from.y}
@@ -81,7 +82,7 @@ export default function TriangleDiagram({ countries, simulations }: TriangleDiag
               className="triangle-edge-label"
               fill={color}
             >
-              {simulation.verdict}
+              {verdictLabel(simulation.verdict)}
             </text>
           </g>
         )

@@ -11,16 +11,19 @@ import {
 } from "recharts"
 import type { Country } from "../domain/country"
 import {
-  alignmentLabel,
+  alignmentLabel as alignmentCodeLabel,
   analyzeScenario,
   type AnalysisResult,
   type ConvergencePoint,
 } from "../domain/analysis"
 import type { PayoffParametersResult } from "../llm/payoffCache"
+import { alignmentLabel } from "../i18n"
 
 type AnalysisResultsScreenProps = {
   readonly countries: readonly Country[]
   readonly results: Readonly<Record<string, PayoffParametersResult>>
+  readonly maximized?: boolean
+  readonly onToggleMaximize?: () => void
 }
 
 /** A palette for the per-party convergence lines, cycling for many parties. */
@@ -37,32 +40,42 @@ const LINE_COLORS = [
   "#e879f9",
 ] as const
 
-/** How each Alignment appears in the table and badges. */
-const ALIGNMENT_LABELS: Readonly<Record<string, string>> = {
-  "SIDE A": "Side A",
-  "SIDE B": "Side B",
-  NEUTRAL: "Neutral",
-}
-
 /**
  * The results half of a Conflict Scenario, shown once every party has Payoff
  * Parameters: an Alignment table, Nash Equilibrium cards (or the closest-to-
  * stable fallback), and a MARL convergence chart of each party's Alignment.
  */
-export default function AnalysisResultsScreen({ countries, results }: AnalysisResultsScreenProps) {
+export default function AnalysisResultsScreen({
+  countries,
+  results,
+  maximized = false,
+  onToggleMaximize,
+}: AnalysisResultsScreenProps) {
   const analysis = useMemo(
     () => analyzeScenario(countries, results),
     [countries, results],
   )
 
   return (
-    <section className="analysis-results" aria-label="Conflict analysis results">
+    <section className="analysis-results" aria-label="نتایج تحلیل درگیری">
       <div className="analysis-header">
-        <h2>Analysis Results</h2>
-        {analysis.hasEquilibrium ? (
-          <p className="analysis-note">Nash equilibria found.</p>
-        ) : (
-          <p className="analysis-note">No stable profile — showing the closest to stable.</p>
+        <div className="analysis-header-info">
+          <h2>نتایج تحلیل</h2>
+          {analysis.hasEquilibrium ? (
+            <p className="analysis-note">تعادل‌های نش یافت شد.</p>
+          ) : (
+            <p className="analysis-note">پروفایل پایدار وجود ندارد — نزدیک‌ترین به پایدار نمایش داده می‌شود.</p>
+          )}
+        </div>
+        {onToggleMaximize && (
+          <button
+            type="button"
+            className="expand-button"
+            aria-pressed={maximized}
+            onClick={onToggleMaximize}
+          >
+            {maximized ? "کوچک کردن" : "بزرگ کردن"}
+          </button>
         )}
       </div>
 
@@ -76,14 +89,14 @@ export default function AnalysisResultsScreen({ countries, results }: AnalysisRe
 function AlignmentTable({ analysis }: { readonly analysis: AnalysisResult }) {
   return (
     <div className="analysis-block">
-      <h3>Alignment</h3>
+      <h3>گرایش</h3>
       <table className="alignment-table">
         <thead>
           <tr>
-            <th scope="col">Party</th>
-            <th scope="col">Alignment</th>
-            <th scope="col">Power Weight</th>
-            <th scope="col">Rationale</th>
+            <th scope="col">طرف</th>
+            <th scope="col">گرایش</th>
+            <th scope="col">وزن قدرت</th>
+            <th scope="col">دلیل</th>
           </tr>
         </thead>
         <tbody>
@@ -92,7 +105,7 @@ function AlignmentTable({ analysis }: { readonly analysis: AnalysisResult }) {
               <td className="alignment-party">{row.name}</td>
               <td>
                 <span className={`alignment-badge alignment-${row.alignment.replaceAll(" ", "-")}`}>
-                  {ALIGNMENT_LABELS[row.alignment]}
+                  {alignmentLabel(row.alignment)}
                 </span>
               </td>
               <td className="alignment-power">{row.powerWeight}</td>
@@ -119,11 +132,10 @@ function NashCards({
     if (!fallback) return null
     return (
       <div className="analysis-block">
-        <h3>Nash Equilibrium</h3>
+        <h3>تعادل نش</h3>
         <div className="nash-no-stable">
           <p className="nash-no-title">
-            No stable profile — closest to stable ({nash.fallbackDefections} defection
-            {nash.fallbackDefections === 1 ? "" : "s"})
+            پروفایل پایدار وجود ندارد — نزدیک‌ترین به پایدار ({nash.fallbackDefections} تخلف)
           </p>
           <ProfileChips profile={fallback} countries={countries} />
         </div>
@@ -133,7 +145,7 @@ function NashCards({
 
   return (
     <div className="analysis-block">
-      <h3>Nash Equilibria</h3>
+      <h3>تعادل‌های نش</h3>
       <div className="nash-cards">
         {nash.equilibria.map((profile, index) => {
           const pareto = nash.paretoOptimal[index]
@@ -149,8 +161,8 @@ function NashCards({
                 .join(" ")
                 .trim()}
             >
-              {pareto && <span className="nash-tag">Pareto-best</span>}
-              {converged && <span className="nash-tag nash-tag-converged">MARL converged</span>}
+              {pareto && <span className="nash-tag">بهینه پارتو</span>}
+              {converged && <span className="nash-tag nash-tag-converged">هم‌گرایی MARL</span>}
               <ProfileChips profile={profile} countries={countries} />
             </div>
           )
@@ -171,9 +183,9 @@ function ProfileChips({
     <ul className="nash-profile">
       {profile.map((alignment, index) => (
         <li key={index} className="nash-profile-item">
-          <span className="nash-party">{countries[index]?.name ?? `Party ${index + 1}`}</span>
+          <span className="nash-party">{countries[index]?.name ?? `طرف ${index + 1}`}</span>
           <span className={`nash-alignment nash-alignment-${alignment.replaceAll(" ", "-")}`}>
-            {ALIGNMENT_LABELS[alignment] ?? alignment}
+            {alignmentLabel(alignment)}
           </span>
         </li>
       ))}
@@ -184,7 +196,7 @@ function ProfileChips({
 function ConvergenceChart({ analysis }: { readonly analysis: AnalysisResult }) {
   return (
     <div className="analysis-block">
-      <h3>MARL Convergence</h3>
+      <h3>هم‌گرایی MARL</h3>
       <div className="convergence-chart">
         <ResponsiveContainer width="100%" height={260}>
           <LineChart data={analysis.points} margin={{ top: 8, right: 12, bottom: 0, left: -16 }}>
@@ -199,7 +211,7 @@ function ConvergenceChart({ analysis }: { readonly analysis: AnalysisResult }) {
             <YAxis
               domain={[0, 2]}
               ticks={[0, 1, 2]}
-              tickFormatter={(value: number) => alignmentLabel(value)}
+              tickFormatter={(value: number) => alignmentLabel(alignmentCodeLabel(value))}
               tick={{ fontSize: 11, fill: "#8ba0c0" }}
             />
             <Tooltip content={convergenceTooltip} />
@@ -232,11 +244,11 @@ function convergenceTooltip(props: {
   if (!datum) return null
   return (
     <div className="convergence-tooltip">
-      <p className="convergence-tooltip-title">Episode {datum.episode}</p>
+      <p className="convergence-tooltip-title">اپیزود {datum.episode}</p>
       {Object.entries(datum)
         .filter(([key]) => key !== "episode")
         .map(([partyId, code]) => (
-          <p key={partyId}>{alignmentLabel(code as number)}</p>
+          <p key={partyId}>{alignmentLabel(alignmentCodeLabel(code as number))}</p>
         ))}
     </div>
   )

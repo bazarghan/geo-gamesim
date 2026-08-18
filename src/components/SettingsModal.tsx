@@ -46,10 +46,10 @@ export default function SettingsModal({
         aria-labelledby="settings-title"
         onClick={(event) => event.stopPropagation()}
       >
-        <h2 id="settings-title">Settings</h2>
+        <h2 id="settings-title">تنظیمات</h2>
         <form onSubmit={handleSubmit} autoComplete="off">
           <div className="modal-field">
-            <label htmlFor="settings-base-url">Base URL</label>
+            <label htmlFor="settings-base-url">آدرس پایه</label>
             <input
               id="settings-base-url"
               type="text"
@@ -64,7 +64,7 @@ export default function SettingsModal({
           </div>
 
           <div className="modal-field">
-            <label htmlFor="settings-api-key">API key</label>
+            <label htmlFor="settings-api-key">کلید API</label>
             <input
               id="settings-api-key"
               type="password"
@@ -78,7 +78,7 @@ export default function SettingsModal({
           </div>
 
           <div className="modal-field">
-            <label htmlFor="settings-model">Model name</label>
+            <label htmlFor="settings-model">نام مدل</label>
             <input
               id="settings-model"
               type="text"
@@ -93,19 +93,19 @@ export default function SettingsModal({
 
           <div className="modal-actions">
             <button type="button" className="ghost-button" onClick={onClearCache}>
-              Clear cached results
+              پاک کردن نتایج حافظه
             </button>
             <button type="button" className="ghost-button" onClick={onClose}>
-              Close
+              بستن
             </button>
             <button type="submit" className="save-button">
-              Save
+              ذخیره
             </button>
           </div>
 
           {saved && (
             <p className="saved-feedback" role="status">
-              Settings saved
+              تنظیمات ذخیره شد
             </p>
           )}
         </form>

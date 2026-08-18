@@ -7,9 +7,9 @@ import { pairingOf } from "../domain/pairing"
 import type { Country } from "../domain/country"
 
 const country = (id: string, name: string): Country => ({ id, name })
-const france = country("250", "France")
-const iran = country("364", "Iran")
-const china = country("156", "China")
+const france = country("250", "فرانسه")
+const iran = country("364", "ایران")
+const china = country("156", "چین")
 const countries = [france, iran, china]
 
 function simOf(a: Country, b: Country, score: number) {
@@ -17,7 +17,7 @@ function simOf(a: Country, b: Country, score: number) {
 }
 
 function diagram(scores: readonly [number, number, number]) {
-  // Scores line up with Pairings in canonical (pairingsFor) order: F–I, F–C, I–C.
+  // Scores line up with Pairings in canonical order
   const simulations = [
     simOf(france, iran, scores[0]),
     simOf(france, china, scores[1]),
@@ -30,9 +30,9 @@ describe("TriangleDiagram", () => {
   it("places the three countries as labeled vertices", () => {
     const html = diagram([10, 10, 10])
 
-    expect(html).toContain("France")
-    expect(html).toContain("Iran")
-    expect(html).toContain("China")
+    expect(html).toContain("فرانسه")
+    expect(html).toContain("ایران")
+    expect(html).toContain("چین")
   })
 
   it("draws one edge per Pairing, colored by its Verdict", () => {
@@ -46,10 +46,9 @@ describe("TriangleDiagram", () => {
   it("labels each edge with its Pairing and Verdict", () => {
     const html = diagram([10, 0, 10])
 
-    // Pairings render in canonical (alphabetical) name order.
-    expect(html).toContain("France — Iran: PEACE")
-    expect(html).toContain("China — France: WAR")
-    expect(html).toContain("China — Iran: PEACE")
+    expect(html).toContain("ایران — فرانسه: آرامش")
+    expect(html).toContain("فرانسه — چین: جنگ")
+    expect(html).toContain("ایران — چین: آرامش")
   })
 
   it("colors every edge with the color of its own simulation's Verdict", () => {

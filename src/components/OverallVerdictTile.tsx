@@ -1,4 +1,5 @@
 import type { OverallVerdict } from "../sim/aggregate"
+import { verdictLabel } from "../i18n"
 
 type OverallVerdictTileProps = {
   readonly verdict: OverallVerdict
@@ -8,8 +9,8 @@ type OverallVerdictTileProps = {
 export default function OverallVerdictTile({ verdict }: OverallVerdictTileProps) {
   return (
     <div className={`overall-tile overall-${verdict.toLowerCase()}`} role="status">
-      <p className="overall-label">Overall Verdict</p>
-      <p className="overall-value">{verdict}</p>
+      <p className="overall-label">داوری کلی</p>
+      <p className="overall-value">{verdictLabel(verdict)}</p>
     </div>
   )
 }

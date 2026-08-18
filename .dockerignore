@@ -1,0 +1,12 @@
+node_modules
+dist
+dist-ssr
+.git
+.gitignore
+.dockerignore
+.agents
+.gemini
+coverage
+*.local
+*.log
+.DS_Store

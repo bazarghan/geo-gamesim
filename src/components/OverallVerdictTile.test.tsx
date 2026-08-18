@@ -6,8 +6,8 @@ describe("OverallVerdictTile", () => {
   it("announces the Overall Verdict", () => {
     const html = renderToString(<OverallVerdictTile verdict="TENSION" />).replaceAll("<!-- -->", "")
 
-    expect(html).toContain("Overall Verdict")
-    expect(html).toContain("TENSION")
+    expect(html).toContain("داوری کلی")
+    expect(html).toContain("تنش")
     expect(html).toContain("overall-tension")
   })
 

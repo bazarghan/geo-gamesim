@@ -1,4 +1,5 @@
-import type { Move, Round, Simulation } from "./engine"
+import type { Round, Simulation } from "./engine"
+import { moveVerb } from "../i18n"
 
 /** How a Round's moves combine — drives the trajectory's move-strip color. */
 export type Outcome = "mutual cooperation" | "mixed" | "mutual defection"
@@ -38,9 +39,5 @@ export function trajectoryData(simulation: Simulation, currentRound: number): re
 /** Human-readable summary of one Round, shown in the tooltip and readout. */
 export function detailFor(simulation: Simulation, round: Round): string {
   const { left, right } = simulation.pairing
-  return `${left.name} ${verbFor(round.leftMove)}, ${right.name} ${verbFor(round.rightMove)}`
-}
-
-function verbFor(move: Move): string {
-  return move === "cooperate" ? "cooperates" : "defects"
+  return `${left.name} ${moveVerb(round.leftMove)}, ${right.name} ${moveVerb(round.rightMove)}`
 }

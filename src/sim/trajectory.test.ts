@@ -48,6 +48,6 @@ describe("trajectoryData", () => {
     expect(data[49].score).toBe(simulation.finalScore)
     expect(data[0].detail).toContain("France")
     expect(data[0].detail).toContain("Iran")
-    expect(data[0].detail).toMatch(/cooperates|defects/)
+    expect(data[0].detail).toMatch(/همکاری می‌کند|تخلف می‌کند/)
   })
 })

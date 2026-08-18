@@ -28,19 +28,19 @@ export default function SelectionPanel({
 
   return (
     <aside className="selection-panel">
-      <h2>Selection</h2>
+      <h2>انتخاب</h2>
       <p className="selection-count">
-        {selected.length} of {SELECTION_LIMIT} countries
+        {selected.length} از {SELECTION_LIMIT} کشور
       </p>
 
       {selected.length === 0 && (
-        <p className="hint">Click countries on the map to select them.</p>
+        <p className="hint">برای انتخاب، روی کشورها در نقشه کلیک کنید.</p>
       )}
       {selected.length === 1 && (
-        <p className="hint">Pick at least one more country to run a simulation.</p>
+        <p className="hint">برای اجرای شبیه‌سازی حداقل یک کشور دیگر انتخاب کنید.</p>
       )}
       {full && (
-        <p className="hint">Selection is full — click a selected country to swap it out.</p>
+        <p className="hint">انتخاب کامل است — برای جایگزینی روی یک کشور انتخاب‌شده کلیک کنید.</p>
       )}
 
       <ul className="chips">
@@ -50,7 +50,7 @@ export default function SelectionPanel({
               type="button"
               className="chip"
               onClick={() => onDeselect(country)}
-              aria-label={`Deselect ${country.name}`}
+              aria-label={`حذف ${country.name}`}
             >
               {country.name}
               <span aria-hidden="true">×</span>
@@ -60,9 +60,9 @@ export default function SelectionPanel({
       </ul>
 
       <div className="pairings">
-        <h3>Pairings</h3>
+        <h3>جفت‌ها</h3>
         {pairings.length === 0 ? (
-          <p className="hint">Every unordered pair of selected countries forms a Pairing.</p>
+          <p className="hint">هر جفت نامرتب از کشورهای انتخاب‌شده یک جفت را تشکیل می‌دهد.</p>
         ) : (
           <ul className="pairing-list">
             {pairings.map((pairing) => {
@@ -74,14 +74,14 @@ export default function SelectionPanel({
                   </span>
                   {status?.state === "loading" && (
                     <p className="pairing-status" role="status">
-                      Asking the model…
+                      در حال پرسش از مدل…
                     </p>
                   )}
                   {status?.state === "done" && (
                     <div className="pairing-result">
                       <p className="pairing-score">
                         <span className="score-value">{status.result.score}/10</span>
-                        {status.cached && <span className="cached-badge">cached</span>}
+                        {status.cached && <span className="cached-badge">از حافظه</span>}
                       </p>
                       <p className="pairing-rationale">{status.result.rationale}</p>
                     </div>
@@ -104,7 +104,7 @@ export default function SelectionPanel({
         disabled={!canRunSimulation(selected)}
         onClick={onRunSimulation}
       >
-        Run Simulation
+        اجرای شبیه‌سازی
       </button>
     </aside>
   )

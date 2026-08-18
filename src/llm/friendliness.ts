@@ -10,18 +10,17 @@ export type FriendlinessOutcome =
   | { readonly ok: false; readonly error: string }
 
 const SYSTEM_PROMPT =
-  "You are a geopolitical analyst. You rate bilateral country relationships " +
-  "and always answer with a single JSON object, nothing else."
+  "شما یک تحلیلگر ژئوپلیتیک هستید. روابط دوجانبه بین کشورها را ارزیابی می‌کنید " +
+  "و همیشه فقط با یک شیء JSON پاسخ می‌دهید، نه چیز دیگری."
 
-const USER_PROMPT_TEMPLATE = `Rate the friendliness of the relationship between two countries.
+const USER_PROMPT_TEMPLATE = `میزان دوستی رابطه بین دو کشور را ارزیابی کن.
 
-Countries: {left} and {right}
+کشورها: {left} و {right}
 
-The friendliness score is a whole number from 0 (open hostility) to 10 (deep
-alliance). The relationship is symmetric — one score covers both directions.
+نمره دوستی یک عدد صحیح از 0 (خصومت آشکار) تا 10 (اتحاد عمیق) است. رابطه متقارن است — یک نمره برای هر دو جهت.
 
-Respond with a single JSON object in exactly this shape:
-{{"score": <whole number 0-10>, "rationale": "<one sentence explaining the score>"}}`
+فقط با یک شیء JSON و دقیقاً به این شکل پاسخ بده:
+{{"score": <عدد صحیح 0-10>, "rationale": "<یک جمله به فارسی که نمره را توضیح می‌دهد>"}}`
 
 /**
  * Query the configured OpenAI-compatible endpoint for one Pairing's
@@ -34,17 +33,17 @@ export async function fetchFriendliness(
   fetchFn: FetchLike = fetch,
 ): Promise<FriendlinessOutcome> {
   if (settings.apiKey === "") {
-    return failure("Missing API key — add one in Settings.")
+    return failure("کلید API وجود ندارد — در تنظیمات یک کلید اضافه کنید.")
   }
   if (settings.model === "") {
-    return failure("No model configured — set one in Settings.")
+    return failure("مدلی تنظیم نشده — در تنظیمات یک مدل تعیین کنید.")
   }
 
   let endpoint: string
   try {
     endpoint = chatCompletionsUrl(settings.baseUrl)
   } catch {
-    return failure(`Cannot use base URL "${settings.baseUrl}" — fix it in Settings.`)
+    return failure(`نمی‌توان از آدرس پایه «${settings.baseUrl}» استفاده کرد — آن را در تنظیمات اصلاح کنید.`)
   }
 
   let response: Response
@@ -71,11 +70,11 @@ export async function fetchFriendliness(
       }),
     })
   } catch {
-    return failure(`Could not reach ${endpoint} — check the base URL in Settings.`)
+    return failure(`دسترسی به ${endpoint} ممکن نشد — آدرس پایه را در تنظیمات بررسی کنید.`)
   }
 
   if (!response.ok) {
-    return failure(`API error ${response.status}: ${await apiErrorMessage(response)}`)
+    return failure(`خطای API ${response.status}: ${await apiErrorMessage(response)}`)
   }
 
   return parseContent(response)
@@ -94,7 +93,7 @@ async function parseContent(response: Response): Promise<FriendlinessOutcome> {
   try {
     text = await response.text()
   } catch {
-    return failure("The endpoint returned a non-JSON response body.")
+    return failure("پاسخ سرور قابل خواندن به‌صورت JSON نبود.")
   }
 
   let payload: unknown
@@ -105,13 +104,13 @@ async function parseContent(response: Response): Promise<FriendlinessOutcome> {
     try {
       payload = JSON.parse(fenced)
     } catch {
-      return failure("The endpoint returned a non-JSON response body.")
+      return failure("پاسخ سرور قابل خواندن به‌صورت JSON نبود.")
     }
   }
 
   const content = contentText(payload)
   if (content === null) {
-    return failure("The endpoint response had no message content.")
+    return failure("پاسخ سرور محتوای پیام نداشت.")
   }
 
   let parsed: unknown
@@ -122,7 +121,7 @@ async function parseContent(response: Response): Promise<FriendlinessOutcome> {
     try {
       parsed = JSON.parse(fenced)
     } catch {
-      return failure("The model did not return valid JSON — try again or switch models.")
+      return failure("مدل خروجی JSON معتبر نداد — دوباره تلاش کنید یا مدل را عوض کنید.")
     }
   }
 
@@ -135,7 +134,7 @@ async function parseContent(response: Response): Promise<FriendlinessOutcome> {
     typeof candidate.rationale !== "string" ||
     candidate.rationale.trim() === ""
   ) {
-    return failure("The model returned an invalid score or rationale — try again or switch models.")
+    return failure("مدل نمره یا توضیح نامعتبر داد — دوباره تلاش کنید یا مدل را عوض کنید.")
   }
 
   return { ok: true, result: { score: Math.round(candidate.score), rationale: candidate.rationale.trim() } }
@@ -156,9 +155,9 @@ async function apiErrorMessage(response: Response): Promise<string> {
   try {
     const body = (await response.json()) as { error?: { message?: unknown } }
     const message = body?.error?.message
-    return typeof message === "string" && message.length > 0 ? message : "request failed"
+    return typeof message === "string" && message.length > 0 ? message : "درخواست ناموفق"
   } catch {
-    return "request failed"
+    return "درخواست ناموفق"
   }
 }
 
