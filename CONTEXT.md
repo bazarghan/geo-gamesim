@@ -46,3 +46,44 @@ The final classification of a Pairing, judged over its final 10 Rounds:
 With three countries, an **Overall Verdict** aggregates the Pairing
 Verdicts: PEACE if all pairs cooperate, WAR if any pair collapses to
 mutual defection, otherwise TENSION.
+
+## Conflict Scenario
+
+A war context being analyzed: two belligerent parties plus a set of
+other parties that may pick a side or stay out. Distinct from the
+per-Pairing **Verdict** WAR, which is a simulation *outcome*, not a
+scenario.
+
+## Party
+
+Any country participating in a Conflict Scenario — including the two
+belligerents.
+
+## Alignment
+
+A Party's stance in a Conflict Scenario: **SIDE A**, **SIDE B**, or
+**NEUTRAL**. The unit of prediction produced by the game-theoretic
+analysis.
+
+## Alignment Profile
+
+The complete assignment of an Alignment to every Party in a Conflict
+Scenario.
+
+## Payoff Parameters
+
+The per-Party numbers the LLM produces from its geopolitical analysis,
+used as inputs to the game: affinity to Side A, affinity to Side B,
+value of neutrality, and power weight. Game theory does the math on
+these; the LLM does not directly pick Alignments.
+
+## Nash Equilibrium
+
+An Alignment Profile in which no Party can raise its payoff by
+unilaterally switching Alignment. Found by exact enumeration of all
+3^n profiles; a Conflict Scenario may have several.
+
+## Equilibrium Selection
+
+Which Nash Equilibrium a set of MARL agents actually converges to,
+answering "which stable outcome is likely" when several exist.

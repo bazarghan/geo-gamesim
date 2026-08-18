@@ -230,4 +230,34 @@ describe("fetchFriendliness response parsing", () => {
 
     expect(outcome.ok).toBe(false)
   })
+
+  it("parses a completion from an SSE streamed response body", async () => {
+    const sseBody =
+      '\n\n{"id":"gen-1","object":"chat.completion","created":1,"model":"deepseek/1","choices":[{"index":0,"message":{"role":"assistant","content":"{\\"score\\": 7, \\"rationale\\": \\"Steady partners.\\"}"}}],"usage":{}}data: [DONE]\n\n'
+    const { fetch } = fakeFetch([
+      new Response(sseBody, {
+        status: 200,
+        headers: { "Content-Type": "text/event-stream" },
+      }),
+    ])
+
+    const outcome = await fetchFriendliness(settings, pairingOf(iran, france), fetch)
+
+    expect(outcome).toEqual({ ok: true, result: { score: 7, rationale: "Steady partners." } })
+  })
+
+  it("parses a completion from a properly-framed SSE body", async () => {
+    const sseBody =
+      'data: {"choices":[{"message":{"content":"{\\"score\\": 4, \\"rationale\\": \\"Wary neighbors.\\"}"}}]}\n\ndata: [DONE]\n'
+    const { fetch } = fakeFetch([
+      new Response(sseBody, {
+        status: 200,
+        headers: { "Content-Type": "text/event-stream" },
+      }),
+    ])
+
+    const outcome = await fetchFriendliness(settings, pairingOf(iran, france), fetch)
+
+    expect(outcome).toEqual({ ok: true, result: { score: 4, rationale: "Wary neighbors." } })
+  })
 })

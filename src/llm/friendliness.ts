@@ -90,11 +90,23 @@ function chatCompletionsUrl(baseUrl: string): string {
 }
 
 async function parseContent(response: Response): Promise<FriendlinessOutcome> {
-  let payload: unknown
+  let text: string
   try {
-    payload = (await response.json()) as { choices?: unknown }
+    text = await response.text()
   } catch {
     return failure("The endpoint returned a non-JSON response body.")
+  }
+
+  let payload: unknown
+  try {
+    payload = JSON.parse(text)
+  } catch {
+    const fenced = text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1)
+    try {
+      payload = JSON.parse(fenced)
+    } catch {
+      return failure("The endpoint returned a non-JSON response body.")
+    }
   }
 
   const content = contentText(payload)
