@@ -1,0 +1,258 @@
+:root {
+  color-scheme: dark;
+  --bg: #0b1220;
+  --panel: #101a2e;
+  --border: #22314f;
+  --text: #e7eef9;
+  --muted: #8ba0c0;
+  --land: #2b3c60;
+  --land-hover: #41598c;
+  --land-selected: #f5a524;
+  --accent: #f5a524;
+  --accent-pressed: #d98e14;
+
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  font-size: 15px;
+  color: var(--text);
+  background-color: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.app-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: 0.02em;
+}
+
+.app-header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.app-main {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.world-map {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding: 8px;
+}
+
+.world-map svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ocean {
+  fill: #0c1526;
+}
+
+.country {
+  fill: var(--land);
+  stroke: #0b1220;
+  stroke-width: 0.5;
+  cursor: pointer;
+  transition: fill 120ms ease;
+}
+
+.country.hovered,
+.country:hover {
+  fill: var(--land-hover);
+}
+
+.country.selected {
+  fill: var(--land-selected);
+}
+
+.country.selected.hovered,
+.country.selected:hover {
+  fill: #ffc45e;
+}
+
+.country-label {
+  fill: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  paint-order: stroke;
+  stroke: #1b263f;
+  stroke-width: 3px;
+  pointer-events: none;
+}
+
+.country-tooltip {
+  position: fixed;
+  z-index: 10;
+  pointer-events: none;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: rgba(11, 18, 32, 0.95);
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+}
+
+.selection-panel {
+  width: 300px;
+  flex-shrink: 0;
+  padding: 20px;
+  border-left: 1px solid var(--border);
+  background: var(--panel);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.selection-panel h2 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.selection-panel h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.selection-count {
+  margin: 0;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #182543;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chip:hover {
+  border-color: var(--accent);
+}
+
+.chip span {
+  color: var(--muted);
+}
+
+.pairings {
+  flex: 1;
+}
+
+.pairing-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pairing-list li {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #0d1729;
+  font-size: 13.5px;
+}
+
+.run-button {
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #1a1205;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.run-button:hover:not(:disabled) {
+  background: var(--accent-pressed);
+}
+
+.run-button:disabled {
+  background: #26344f;
+  color: #6b7f9e;
+  cursor: not-allowed;
+}
+
+@media (max-width: 820px) {
+  .app-main {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .world-map {
+    min-height: 340px;
+  }
+
+  .selection-panel {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+}
