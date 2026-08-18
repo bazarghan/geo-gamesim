@@ -1,10 +1,18 @@
 import type { Country } from "../domain/country"
-import type { Pairing } from "../domain/pairing"
+import { pairingId, type Pairing } from "../domain/pairing"
+import type { FriendlinessResult } from "../llm/scoreCache"
 import { canRunSimulation, SELECTION_LIMIT } from "../domain/selection"
+
+/** Per-Pairing display state for the most recent run. */
+export type PairingStatus =
+  | { readonly state: "loading" }
+  | { readonly state: "done"; readonly result: FriendlinessResult; readonly cached: boolean }
+  | { readonly state: "error"; readonly error: string }
 
 type SelectionPanelProps = {
   readonly selected: readonly Country[]
   readonly pairings: readonly Pairing[]
+  readonly statuses: Readonly<Record<string, PairingStatus>>
   readonly onDeselect: (country: Country) => void
   readonly onRunSimulation: () => void
 }
@@ -12,6 +20,7 @@ type SelectionPanelProps = {
 export default function SelectionPanel({
   selected,
   pairings,
+  statuses,
   onDeselect,
   onRunSimulation,
 }: SelectionPanelProps) {
@@ -56,11 +65,35 @@ export default function SelectionPanel({
           <p className="hint">Every unordered pair of selected countries forms a Pairing.</p>
         ) : (
           <ul className="pairing-list">
-            {pairings.map((pairing) => (
-              <li key={`${pairing.left.id}-${pairing.right.id}`}>
-                {pairing.left.name} — {pairing.right.name}
-              </li>
-            ))}
+            {pairings.map((pairing) => {
+              const status = statuses[pairingId(pairing)]
+              return (
+                <li key={pairingId(pairing)} className="pairing-card">
+                  <span className="pairing-name">
+                    {pairing.left.name} — {pairing.right.name}
+                  </span>
+                  {status?.state === "loading" && (
+                    <p className="pairing-status" role="status">
+                      Asking the model…
+                    </p>
+                  )}
+                  {status?.state === "done" && (
+                    <div className="pairing-result">
+                      <p className="pairing-score">
+                        <span className="score-value">{status.result.score}/10</span>
+                        {status.cached && <span className="cached-badge">cached</span>}
+                      </p>
+                      <p className="pairing-rationale">{status.result.rationale}</p>
+                    </div>
+                  )}
+                  {status?.state === "error" && (
+                    <p className="pairing-error" role="alert">
+                      {status.error}
+                    </p>
+                  )}
+                </li>
+              )
+            })}
           </ul>
         )}
       </div>

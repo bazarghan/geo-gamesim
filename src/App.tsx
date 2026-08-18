@@ -1,17 +1,53 @@
 import { useMemo, useState } from "react"
-import SelectionPanel from "./components/SelectionPanel"
+import SelectionPanel, { type PairingStatus } from "./components/SelectionPanel"
 import SettingsModal from "./components/SettingsModal"
 import WorldMap from "./components/WorldMap"
 import type { Country } from "./domain/country"
-import { pairingsFor } from "./domain/pairing"
+import { pairingId, pairingsFor } from "./domain/pairing"
 import { toggleCountry } from "./domain/selection"
+import { fetchFriendliness } from "./llm/friendliness"
+import {
+  clearScoreCache,
+  getCachedResult,
+  saveCachedResult,
+} from "./llm/scoreCache"
 import { getLocalStorage, loadSettings, saveSettings, type Settings } from "./settings/settings"
 
 export default function App() {
   const [selected, setSelected] = useState<readonly Country[]>([])
   const [settings, setSettings] = useState<Settings>(() => loadSettings(getLocalStorage()))
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [pairingStatuses, setPairingStatuses] = useState<Readonly<Record<string, PairingStatus>>>({})
   const pairings = useMemo(() => pairingsFor(selected), [selected])
+
+  // A new selection starts a fresh run — stale scores from other Pairings
+  // must not linger.
+  const toggle = (country: Country) => {
+    setSelected(toggleCountry(selected, country))
+    setPairingStatuses({})
+  }
+
+  const runSimulation = () => {
+    const storage = getLocalStorage()
+    for (const pairing of pairings) {
+      const key = pairingId(pairing)
+
+      const cached = getCachedResult(storage, settings.model, pairing)
+      if (cached !== null) {
+        setPairingStatuses((prev) => ({ ...prev, [key]: { state: "done", result: cached, cached: true } }))
+        continue
+      }
+
+      setPairingStatuses((prev) => ({ ...prev, [key]: { state: "loading" } }))
+      void fetchFriendliness(settings, pairing).then((outcome) => {
+        setPairingStatuses((prev) => {
+          if (!outcome.ok) return { ...prev, [key]: { state: "error", error: outcome.error } }
+          saveCachedResult(storage, settings.model, pairing, outcome.result)
+          return { ...prev, [key]: { state: "done", result: outcome.result, cached: false } }
+        })
+      })
+    }
+  }
 
   return (
     <div className="app">
@@ -31,17 +67,13 @@ export default function App() {
         </button>
       </header>
       <main className="app-main">
-        <WorldMap
-          selected={selected}
-          onToggleCountry={(country) => setSelected(toggleCountry(selected, country))}
-        />
+        <WorldMap selected={selected} onToggleCountry={toggle} />
         <SelectionPanel
           selected={selected}
           pairings={pairings}
-          onDeselect={(country) => setSelected(toggleCountry(selected, country))}
-          onRunSimulation={() => {
-            // Simulation engine not built yet — ticket 01 stops at selection.
-          }}
+          statuses={pairingStatuses}
+          onDeselect={toggle}
+          onRunSimulation={runSimulation}
         />
       </main>
       {settingsOpen && (
@@ -52,7 +84,7 @@ export default function App() {
             setSettings(next)
           }}
           onClose={() => setSettingsOpen(false)}
-          onClearCache={() => {}}
+          onClearCache={() => clearScoreCache(getLocalStorage())}
         />
       )}
     </div>

@@ -31,3 +31,8 @@ function comparePairings(a: Pairing, b: Pairing): number {
 export function pairingOf(a: Country, b: Country): Pairing {
   return a.name < b.name ? { left: a, right: b } : { left: b, right: a }
 }
+
+/** Stable identifier for a Pairing — canonical ids joined, selection-order-free. */
+export function pairingId(pairing: Pairing): string {
+  return `${pairing.left.id}-${pairing.right.id}`
+}

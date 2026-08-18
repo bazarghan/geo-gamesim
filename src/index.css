@@ -335,15 +335,67 @@ body {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
-.pairing-list li {
-  padding: 8px 12px;
+.pairing-card {
+  padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: #0d1729;
   font-size: 13.5px;
+}
+
+.pairing-name {
+  display: block;
+  font-weight: 600;
+}
+
+.pairing-status {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.pairing-result {
+  margin-top: 6px;
+}
+
+.pairing-score {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.score-value {
+  color: var(--accent);
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.cached-badge {
+  padding: 1px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.pairing-rationale {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.pairing-error {
+  margin: 6px 0 0;
+  color: #ff9d9d;
+  font-size: 13px;
 }
 
 .run-button {

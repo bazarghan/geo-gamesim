@@ -12,6 +12,12 @@ Ticket 02 adds a settings modal (gear icon in the header) for configuring any
 OpenAI-compatible LLM endpoint — base URL, API key, and model name — persisted
 to `localStorage`.
 
+Ticket 03 wires "Run Simulation" to the configured endpoint: each Pairing gets
+one JSON-mode request for a Friendliness Score (0–10) plus a one-sentence
+rationale, shown per Pairing with loading and error states. Results are cached
+in `localStorage` per (model, Pairing) — the settings clear-cache button wipes
+the cache.
+
 ## Commands
 
 | Command           | What it does                    |
@@ -26,6 +32,8 @@ to `localStorage`.
 
 - `src/domain/` — pure logic: `Country`, selection state (cap 3), `Pairing`
 - `src/settings/` — LLM endpoint settings, persisted to `localStorage`
+- `src/llm/` — Friendliness Score client (JSON mode) and its (model, Pairing)
+  result cache, persisted to `localStorage`
 - `src/map/` — world data (world-atlas / Natural Earth 110m), projection,
   label-anchor geometry
 - `src/components/` — `WorldMap`, `SelectionPanel`, and `SettingsModal`
