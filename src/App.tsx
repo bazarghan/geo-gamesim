@@ -22,6 +22,7 @@ import {
   getCachedPayoff,
   saveCachedPayoff,
   scenarioKey,
+  type PayoffParametersResult,
 } from "./llm/payoffCache"
 import { getLocalStorage, loadSettings, saveSettings, type Settings } from "./settings/settings"
 import { overallVerdictFor } from "./sim/aggregate"
@@ -29,6 +30,7 @@ import { simulate } from "./sim/engine"
 import PairingPlayback from "./components/PairingPlayback"
 import OverallVerdictTile from "./components/OverallVerdictTile"
 import TriangleDiagram from "./components/TriangleDiagram"
+import AnalysisResultsScreen from "./components/AnalysisResultsScreen"
 
 export default function App() {
   const [mode, setMode] = useState<SimulationMode>(BILATERAL_MODE)
@@ -62,6 +64,19 @@ export default function App() {
   // selection has been scored.
   const fullRun =
     selected.length === SELECTION_LIMIT && simulations.length === pairings.length
+
+  // Ticket 09: the conflict results screen appears once every party in the
+  // scenario has its Payoff Parameters, then the engine runs on them.
+  const conflictResults = useMemo(() => {
+    const results: Record<string, PayoffParametersResult> = {}
+    for (const country of selected) {
+      const status = conflictStatuses[country.id]
+      if (status?.state === "done") results[country.id] = status.result
+    }
+    return results
+  }, [selected, conflictStatuses])
+  const conflictAnalysisDone =
+    !isBilateral && selected.length > 0 && selected.every((c) => conflictStatuses[c.id]?.state === "done")
 
   // A new selection starts a fresh run — stale scores from other Pairings
   // must not linger. Each mode caps its selection differently.
@@ -232,6 +247,9 @@ export default function App() {
                 })}
               </div>
             </section>
+          )}
+          {!isBilateral && conflictAnalysisDone && (
+            <AnalysisResultsScreen countries={selected} results={conflictResults} />
           )}
         </div>
         {isBilateral ? (
