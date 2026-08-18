@@ -2,9 +2,11 @@ import { useMemo, useState } from "react"
 import SelectionPanel, { type PairingStatus } from "./components/SelectionPanel"
 import SettingsModal from "./components/SettingsModal"
 import WorldMap from "./components/WorldMap"
-import ConflictSelectionPanel from "./components/ConflictSelectionPanel"
+import ConflictSelectionPanel, {
+  type ConflictPartyStatus,
+} from "./components/ConflictSelectionPanel"
 import type { Country } from "./domain/country"
-import { belligerents, CONFLICT_LIMIT } from "./domain/conflict"
+import { BELLIGERENT_COUNT, belligerents, CONFLICT_LIMIT } from "./domain/conflict"
 import { BILATERAL_MODE, CONFLICT_MODE, type SimulationMode } from "./domain/mode"
 import { pairingId, pairingsFor } from "./domain/pairing"
 import { SELECTION_LIMIT, toggleCountry } from "./domain/selection"
@@ -14,6 +16,13 @@ import {
   getCachedResult,
   saveCachedResult,
 } from "./llm/scoreCache"
+import { fetchPayoffParameters } from "./llm/payoffParameters"
+import {
+  clearPayoffCache,
+  getCachedPayoff,
+  saveCachedPayoff,
+  scenarioKey,
+} from "./llm/payoffCache"
 import { getLocalStorage, loadSettings, saveSettings, type Settings } from "./settings/settings"
 import { overallVerdictFor } from "./sim/aggregate"
 import { simulate } from "./sim/engine"
@@ -27,6 +36,9 @@ export default function App() {
   const [settings, setSettings] = useState<Settings>(() => loadSettings(getLocalStorage()))
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [pairingStatuses, setPairingStatuses] = useState<Readonly<Record<string, PairingStatus>>>({})
+  const [conflictStatuses, setConflictStatuses] = useState<
+    Readonly<Record<string, ConflictPartyStatus>>
+  >({})
   const [simulationMaximized, setSimulationMaximized] = useState(false)
 
   const isBilateral = mode === BILATERAL_MODE
@@ -56,10 +68,65 @@ export default function App() {
   const toggle = (country: Country) => {
     setSelected(toggleCountry(selected, country, isBilateral ? SELECTION_LIMIT : CONFLICT_LIMIT))
     setPairingStatuses({})
+    setConflictStatuses({})
   }
 
-  // Ticket 08 wires this up: one payoff-parameter LLM call per party.
-  const runConflictAnalysis = () => {}
+  // Ticket 08: one payoff-parameter LLM call per party in the scenario,
+  // cached per (model, scenario, party) and retried per party on demand.
+  const runConflictAnalysis = () => {
+    const storage = getLocalStorage()
+    const scenario = scenarioKey(selected.map((c) => c.id))
+    const context = `The two belligerents are ${belligerents(selected)
+      .map((c) => c.name)
+      .join(" and ")}. Other parties involved: ${selected
+      .slice(BELLIGERENT_COUNT)
+      .map((c) => c.name)
+      .join(", ") || "none"}.`
+
+    for (const country of selected) {
+      const cached = getCachedPayoff(storage, settings.model, scenario, country.id)
+      if (cached !== null) {
+        setConflictStatuses((prev) => ({
+          ...prev,
+          [country.id]: { state: "done", result: cached, cached: true },
+        }))
+        continue
+      }
+      setConflictStatuses((prev) => ({ ...prev, [country.id]: { state: "loading" } }))
+      void fetchPayoffParameters(settings, country.name, context).then((outcome) => {
+        setConflictStatuses((prev) => {
+          if (!outcome.ok) {
+            return { ...prev, [country.id]: { state: "error", error: outcome.error } }
+          }
+          saveCachedPayoff(storage, settings.model, scenario, country.id, outcome.result)
+          return { ...prev, [country.id]: { state: "done", result: outcome.result, cached: false } }
+        })
+      })
+    }
+  }
+
+  // Re-run a single failed party without touching any other party's status.
+  const retryParty = (country: Country) => {
+    const storage = getLocalStorage()
+    const scenario = scenarioKey(selected.map((c) => c.id))
+    const context = `The two belligerents are ${belligerents(selected)
+      .map((c) => c.name)
+      .join(" and ")}. Other parties involved: ${selected
+      .slice(BELLIGERENT_COUNT)
+      .map((c) => c.name)
+      .join(", ") || "none"}.`
+
+    setConflictStatuses((prev) => ({ ...prev, [country.id]: { state: "loading" } }))
+    void fetchPayoffParameters(settings, country.name, context).then((outcome) => {
+      setConflictStatuses((prev) => {
+        if (!outcome.ok) {
+          return { ...prev, [country.id]: { state: "error", error: outcome.error } }
+        }
+        saveCachedPayoff(storage, settings.model, scenario, country.id, outcome.result)
+        return { ...prev, [country.id]: { state: "done", result: outcome.result, cached: false } }
+      })
+    })
+  }
 
   const runSimulation = () => {
     const storage = getLocalStorage()
@@ -178,8 +245,10 @@ export default function App() {
         ) : (
           <ConflictSelectionPanel
             selected={selected}
+            statuses={conflictStatuses}
             onDeselect={toggle}
             onRunAnalysis={runConflictAnalysis}
+            onRetryParty={retryParty}
           />
         )}
       </main>
@@ -191,7 +260,10 @@ export default function App() {
             setSettings(next)
           }}
           onClose={() => setSettingsOpen(false)}
-          onClearCache={() => clearScoreCache(getLocalStorage())}
+          onClearCache={() => {
+            clearScoreCache(getLocalStorage())
+            clearPayoffCache(getLocalStorage())
+          }}
         />
       )}
     </div>

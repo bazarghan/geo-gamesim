@@ -9,12 +9,14 @@ const iran = country("364", "Iran")
 const france = country("250", "France")
 const japan = country("392", "Japan")
 
-function panel(selected: readonly Country[]) {
+function panel(selected: readonly Country[], statuses = {}) {
   const html = renderToString(
     <ConflictSelectionPanel
       selected={selected}
+      statuses={statuses}
       onDeselect={() => {}}
       onRunAnalysis={() => {}}
+      onRetryParty={() => {}}
     />,
   )
   return html.replaceAll("<!-- -->", "")
@@ -53,5 +55,55 @@ describe("ConflictSelectionPanel", () => {
     expect(html).toContain('aria-label="Deselect Iran"')
     expect(html).toContain('aria-label="Deselect France"')
     expect(html).toContain('aria-label="Deselect Japan"')
+  })
+
+  it("shows a loading status for a party being queried", () => {
+    const html = panel([iran, france, japan], {
+      [iran.id]: { state: "loading" },
+    })
+
+    expect(html).toContain("Asking the model…")
+  })
+
+  it("shows computed parameters and rationale once a party is done", () => {
+    const html = panel([iran, france, japan], {
+      [iran.id]: {
+        state: "done",
+        cached: false,
+        result: {
+          parameters: { affinitySideA: 8, affinitySideB: 2, neutralityValue: 4, powerWeight: 7 },
+          rationale: "Firmly aligned with the regional bloc.",
+        },
+      },
+    })
+
+    expect(html).toContain("A: 8")
+    expect(html).toContain("B: 2")
+    expect(html).toContain("Power: 7")
+    expect(html).toContain("Firmly aligned with the regional bloc.")
+  })
+
+  it("shows a cached badge when a done party came from cache", () => {
+    const html = panel([iran, france, japan], {
+      [iran.id]: {
+        state: "done",
+        cached: true,
+        result: {
+          parameters: { affinitySideA: 8, affinitySideB: 2, neutralityValue: 4, powerWeight: 7 },
+          rationale: "Firmly aligned.",
+        },
+      },
+    })
+
+    expect(html).toContain("cached")
+  })
+
+  it("shows an error with a retry action for a failed party", () => {
+    const html = panel([iran, france, japan], {
+      [iran.id]: { state: "error", error: "API error 401: bad key" },
+    })
+
+    expect(html).toContain("API error 401: bad key")
+    expect(html).toContain("Retry")
   })
 })
