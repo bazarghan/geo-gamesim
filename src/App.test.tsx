@@ -18,4 +18,12 @@ describe("App", () => {
     expect(html).not.toContain("country-label")
     expect(html).not.toContain("country-tooltip")
   })
+
+  it("renders the settings gear but keeps the settings modal closed", () => {
+    const html = renderToString(<App />)
+
+    expect(html).toContain('aria-label="Settings"')
+    expect(html).not.toContain("Clear cached results")
+    expect(html).not.toContain("Base URL")
+  })
 })

@@ -8,6 +8,10 @@ Ticket 01 delivers the scaffold: a selectable Natural Earth 110m world map
 (Antarctica excluded) with hover tooltips, selection highlighting and labels,
 and a "Run Simulation" button that activates once 2–3 countries are selected.
 
+Ticket 02 adds a settings modal (gear icon in the header) for configuring any
+OpenAI-compatible LLM endpoint — base URL, API key, and model name — persisted
+to `localStorage`.
+
 ## Commands
 
 | Command           | What it does                    |
@@ -21,6 +25,7 @@ and a "Run Simulation" button that activates once 2–3 countries are selected.
 ## Layout
 
 - `src/domain/` — pure logic: `Country`, selection state (cap 3), `Pairing`
+- `src/settings/` — LLM endpoint settings, persisted to `localStorage`
 - `src/map/` — world data (world-atlas / Natural Earth 110m), projection,
   label-anchor geometry
-- `src/components/` — `WorldMap` and `SelectionPanel`
+- `src/components/` — `WorldMap`, `SelectionPanel`, and `SettingsModal`
