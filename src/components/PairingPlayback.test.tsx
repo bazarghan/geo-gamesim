@@ -2,15 +2,17 @@ import { describe, expect, it } from "vitest"
 import { renderToString } from "react-dom/server"
 import PairingPlayback from "./PairingPlayback"
 import { simulate } from "../sim/engine"
+import { pairingOf } from "../domain/pairing"
 
-const country = (id: string, name: string) => ({ id, name })
-const france = country("250", "France")
-const iran = country("364", "Iran")
-const pairing = france.name < iran.name ? { left: france, right: iran } : { left: iran, right: france }
+const france = { id: "250", name: "France" }
+const iran = { id: "364", name: "Iran" }
+const pairing = pairingOf(france, iran)
 
 /** Render a card and strip SSR comment separators for clean matching. */
-function playback(score: number) {
-  return renderToString(<PairingPlayback simulation={simulate(pairing, score)} />).replaceAll("<!-- -->", "")
+function playback(score: number, rationale?: string) {
+  return renderToString(
+    <PairingPlayback simulation={simulate(pairing, score)} rationale={rationale} />,
+  ).replaceAll("<!-- -->", "")
 }
 
 describe("PairingPlayback", () => {
@@ -52,5 +54,12 @@ describe("PairingPlayback", () => {
 
   it("mounts the recharts trajectory container", () => {
     expect(playback(4)).toContain("recharts-responsive-container")
+  })
+
+  it("shows the LLM rationale under the header when provided", () => {
+    expect(playback(4, "Long-standing rivals over the Persian Gulf.")).toContain(
+      "Long-standing rivals over the Persian Gulf.",
+    )
+    expect(playback(4)).not.toContain("playback-rationale")
   })
 })

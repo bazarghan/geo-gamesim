@@ -23,6 +23,7 @@ const SPEEDS = [
 
 type PairingPlaybackProps = {
   readonly simulation: Simulation
+  readonly rationale?: string
 }
 
 /**
@@ -30,7 +31,7 @@ type PairingPlaybackProps = {
  * a recharts trajectory of the precomputed Rounds and the drifting
  * Friendliness Score, ending in the Pairing's Verdict.
  */
-export default function PairingPlayback({ simulation }: PairingPlaybackProps) {
+export default function PairingPlayback({ simulation, rationale }: PairingPlaybackProps) {
   const [currentRound, setCurrentRound] = useState(1)
   const [playing, setPlaying] = useState(false)
   const [speedIndex, setSpeedIndex] = useState(1)
@@ -80,6 +81,8 @@ export default function PairingPlayback({ simulation }: PairingPlaybackProps) {
           {simulation.verdict}
         </span>
       </header>
+
+      {rationale && <p className="playback-rationale">{rationale}</p>}
 
       <div className="playback-chart">
         <ResponsiveContainer width="100%" height={200}>

@@ -4,7 +4,7 @@ import SettingsModal from "./components/SettingsModal"
 import WorldMap from "./components/WorldMap"
 import type { Country } from "./domain/country"
 import { pairingId, pairingsFor } from "./domain/pairing"
-import { toggleCountry } from "./domain/selection"
+import { SELECTION_LIMIT, toggleCountry } from "./domain/selection"
 import { fetchFriendliness } from "./llm/friendliness"
 import {
   clearScoreCache,
@@ -12,14 +12,18 @@ import {
   saveCachedResult,
 } from "./llm/scoreCache"
 import { getLocalStorage, loadSettings, saveSettings, type Settings } from "./settings/settings"
+import { overallVerdictFor } from "./sim/aggregate"
 import { simulate } from "./sim/engine"
 import PairingPlayback from "./components/PairingPlayback"
+import OverallVerdictTile from "./components/OverallVerdictTile"
+import TriangleDiagram from "./components/TriangleDiagram"
 
 export default function App() {
   const [selected, setSelected] = useState<readonly Country[]>([])
   const [settings, setSettings] = useState<Settings>(() => loadSettings(getLocalStorage()))
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [pairingStatuses, setPairingStatuses] = useState<Readonly<Record<string, PairingStatus>>>({})
+  const [simulationMaximized, setSimulationMaximized] = useState(false)
   const pairings = useMemo(() => pairingsFor(selected), [selected])
 
   // Every scored Pairing gets its 50-Round story computed instantly, in full.
@@ -31,6 +35,11 @@ export default function App() {
       }),
     [pairings, pairingStatuses],
   )
+
+  // The three-country results screen appears once every Pairing of a full
+  // selection has been scored.
+  const fullRun =
+    selected.length === SELECTION_LIMIT && simulations.length === pairings.length
 
   // A new selection starts a fresh run — stale scores from other Pairings
   // must not linger.
@@ -79,14 +88,39 @@ export default function App() {
         </button>
       </header>
       <main className="app-main">
-        <div className="stage">
+        <div className={simulationMaximized ? "stage stage-maximized" : "stage"}>
           <WorldMap selected={selected} onToggleCountry={toggle} />
           {simulations.length > 0 && (
             <section className="simulation-stage" aria-label="Simulations">
-              <h2>Simulations</h2>
-              {simulations.map((simulation) => (
-                <PairingPlayback key={pairingId(simulation.pairing)} simulation={simulation} />
-              ))}
+              <div className="simulation-header">
+                <h2>Simulations</h2>
+                <button
+                  type="button"
+                  className="expand-button"
+                  aria-pressed={simulationMaximized}
+                  onClick={() => setSimulationMaximized((maximized) => !maximized)}
+                >
+                  {simulationMaximized ? "Minimize" : "Maximize"}
+                </button>
+              </div>
+              {fullRun && (
+                <div className="results-summary">
+                  <TriangleDiagram countries={selected} simulations={simulations} />
+                  <OverallVerdictTile verdict={overallVerdictFor(simulations)} />
+                </div>
+              )}
+              <div className="simulation-panels">
+                {simulations.map((simulation) => {
+                  const status = pairingStatuses[pairingId(simulation.pairing)]
+                  return (
+                    <PairingPlayback
+                      key={pairingId(simulation.pairing)}
+                      simulation={simulation}
+                      rationale={status?.state === "done" ? status.result.rationale : undefined}
+                    />
+                  )
+                })}
+              </div>
             </section>
           )}
         </div>
