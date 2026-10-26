@@ -234,7 +234,12 @@ describe("fetchPayoffParameters response parsing and clamping", () => {
     expect(outcome).toEqual({
       ok: true,
       result: {
-        parameters: { affinitySideA: 7.78, affinitySideB: 2, neutralityValue: 4.5, powerWeight: 9.12 },
+        parameters: {
+          affinitySideA: 7.78,
+          affinitySideB: 2,
+          neutralityValue: 4.5,
+          powerWeight: 9.12,
+        },
         rationale: "Roughly aligned.",
       },
     })
@@ -242,7 +247,9 @@ describe("fetchPayoffParameters response parsing and clamping", () => {
 
   it("rejects a malformed parameter (non-number)", async () => {
     const { fetch } = fakeFetch([
-      completion('{"affinitySideA": "high", "affinitySideB": 2, "neutralityValue": 4, "powerWeight": 7, "rationale": "x"}'),
+      completion(
+        '{"affinitySideA": "high", "affinitySideB": 2, "neutralityValue": 4, "powerWeight": 7, "rationale": "x"}',
+      ),
     ])
 
     const outcome = await fetchPayoffParameters(settings, "Turkey", context, fetch)
@@ -252,7 +259,9 @@ describe("fetchPayoffParameters response parsing and clamping", () => {
 
   it("rejects a missing parameter", async () => {
     const { fetch } = fakeFetch([
-      completion('{"affinitySideA": 8, "affinitySideB": 2, "neutralityValue": 4, "rationale": "x"}'),
+      completion(
+        '{"affinitySideA": 8, "affinitySideB": 2, "neutralityValue": 4, "rationale": "x"}',
+      ),
     ])
 
     const outcome = await fetchPayoffParameters(settings, "Turkey", context, fetch)
@@ -262,7 +271,9 @@ describe("fetchPayoffParameters response parsing and clamping", () => {
 
   it("rejects a missing rationale", async () => {
     const { fetch } = fakeFetch([
-      completion('{"affinitySideA": 8, "affinitySideB": 2, "neutralityValue": 4, "powerWeight": 7}'),
+      completion(
+        '{"affinitySideA": 8, "affinitySideB": 2, "neutralityValue": 4, "powerWeight": 7}',
+      ),
     ])
 
     const outcome = await fetchPayoffParameters(settings, "Turkey", context, fetch)
@@ -271,9 +282,7 @@ describe("fetchPayoffParameters response parsing and clamping", () => {
   })
 
   it("recovers JSON wrapped in markdown fences", async () => {
-    const { fetch } = fakeFetch([
-      completion(`\`\`\`json\n${JSON.stringify(fullResult)}\n\`\`\``),
-    ])
+    const { fetch } = fakeFetch([completion(`\`\`\`json\n${JSON.stringify(fullResult)}\n\`\`\``)])
 
     const outcome = await fetchPayoffParameters(settings, "Turkey", context, fetch)
 
@@ -287,4 +296,14 @@ describe("fetchPayoffParameters response parsing and clamping", () => {
 
     expect(outcome.ok).toBe(false)
   })
+})
+
+it("requests an English conflict rationale when English is selected", async () => {
+  const { fetch, requests } = fakeFetch([completion(JSON.stringify(fullResult))])
+  await fetchPayoffParameters(settings, "Turkey", context, fetch, "en")
+  const body = JSON.parse(requests[0].init.body as string)
+  expect(body.messages[0].content).toContain("English")
+  expect(body.messages[1].content).toContain("affinitySideA")
+  expect(body.messages[1].content).toContain(context)
+  expect(body.messages[1].content).not.toMatch(/[\u0600-\u06ff]/)
 })

@@ -61,9 +61,9 @@ describe("fetchFriendliness request shape", () => {
     }
     expect(body.model).toBe("gpt-4o-mini")
     expect(body.response_format).toEqual({ type: "json_object" })
-    expect(body.messages.some((m) => m.content.includes("Iran") && m.content.includes("France"))).toBe(
-      true,
-    )
+    expect(
+      body.messages.some((m) => m.content.includes("ایران") && m.content.includes("فرانسه")),
+    ).toBe(true)
     expect(outcome).toEqual({ ok: true, result: { score: 5, rationale: "Neutral." } })
   })
 
@@ -259,5 +259,29 @@ describe("fetchFriendliness response parsing", () => {
     const outcome = await fetchFriendliness(settings, pairingOf(iran, france), fetch)
 
     expect(outcome).toEqual({ ok: true, result: { score: 4, rationale: "Wary neighbors." } })
+  })
+})
+
+describe("English requests", () => {
+  it("requests an English rationale and canonical English country names", async () => {
+    const { fetch, requests } = fakeFetch([completion('{"score": 5, "rationale": "Neutral."}')])
+    await fetchFriendliness(settings, pairingOf(iran, france), fetch, "en")
+    const body = JSON.parse(requests[0].init.body as string)
+    expect(body.messages[0].content).toContain("English")
+    expect(body.messages[1].content).toContain("Iran")
+    expect(body.messages[1].content).toContain("France")
+    expect(body.messages[1].content).not.toMatch(/[\u0600-\u06ff]/)
+  })
+
+  it("localizes validation failures before making a request", async () => {
+    const { fetch, requests } = fakeFetch([])
+    const result = await fetchFriendliness(
+      { ...settings, apiKey: "" },
+      pairingOf(iran, france),
+      fetch,
+      "en",
+    )
+    expect(result).toEqual({ ok: false, error: "Missing API key — add one in Settings." })
+    expect(requests).toHaveLength(0)
   })
 })

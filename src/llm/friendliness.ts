@@ -1,3 +1,4 @@
+import { translate, countryName, type Language } from "../i18n"
 import type { Pairing } from "../domain/pairing"
 import type { Settings } from "../settings/settings"
 import type { FriendlinessResult } from "./scoreCache"
@@ -31,19 +32,27 @@ export async function fetchFriendliness(
   settings: Settings,
   pairing: Pairing,
   fetchFn: FetchLike = fetch,
+  language: Language = "fa",
 ): Promise<FriendlinessOutcome> {
   if (settings.apiKey === "") {
-    return failure("کلید API وجود ندارد — در تنظیمات یک کلید اضافه کنید.")
+    return failure("کلید API وجود ندارد — در تنظیمات یک کلید اضافه کنید.", language)
   }
   if (settings.model === "") {
-    return failure("مدلی تنظیم نشده — در تنظیمات یک مدل تعیین کنید.")
+    return failure("مدلی تنظیم نشده — در تنظیمات یک مدل تعیین کنید.", language)
   }
 
   let endpoint: string
   try {
     endpoint = chatCompletionsUrl(settings.baseUrl)
   } catch {
-    return failure(`نمی‌توان از آدرس پایه «${settings.baseUrl}» استفاده کرد — آن را در تنظیمات اصلاح کنید.`)
+    return failure(
+      translate(
+        "نمی‌توان از آدرس پایه «{url}» استفاده کرد — آن را در تنظیمات اصلاح کنید.",
+        language,
+        { url: settings.baseUrl },
+      ),
+      language,
+    )
   }
 
   let response: Response
@@ -58,26 +67,43 @@ export async function fetchFriendliness(
         model: settings.model,
         response_format: { type: "json_object" },
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          {
+            role: "system",
+            content:
+              language === "en"
+                ? "You are a geopolitical analyst. Evaluate bilateral relationships and return only a JSON object. Write the rationale in English."
+                : SYSTEM_PROMPT,
+          },
           {
             role: "user",
-            content: USER_PROMPT_TEMPLATE.replace("{left}", pairing.left.name).replace(
-              "{right}",
-              pairing.right.name,
-            ),
+            content:
+              language === "en"
+                ? `Rate the symmetric relationship between ${countryName(pairing.left.name, "en")} and ${countryName(pairing.right.name, "en")}. Return only JSON: {"score": <integer 0-10, hostility to deep alliance>, "rationale": "<one sentence in English>"}.`
+                : USER_PROMPT_TEMPLATE.replace(
+                    "{left}",
+                    countryName(pairing.left.name, "fa"),
+                  ).replace("{right}", countryName(pairing.right.name, "fa")),
           },
         ],
       }),
     })
   } catch {
-    return failure(`دسترسی به ${endpoint} ممکن نشد — آدرس پایه را در تنظیمات بررسی کنید.`)
+    return failure(
+      translate("دسترسی به {url} ممکن نشد — آدرس پایه را در تنظیمات بررسی کنید.", language, {
+        url: endpoint,
+      }),
+      language,
+    )
   }
 
   if (!response.ok) {
-    return failure(`خطای API ${response.status}: ${await apiErrorMessage(response)}`)
+    return failure(
+      `${translate("خطای API", language)} ${response.status}: ${await apiErrorMessage(response, language)}`,
+      language,
+    )
   }
 
-  return parseContent(response)
+  return parseContent(response, language)
 }
 
 /** `https://example.com/v1` → `https://example.com/v1/chat/completions`. */
@@ -88,12 +114,12 @@ function chatCompletionsUrl(baseUrl: string): string {
   return url.toString()
 }
 
-async function parseContent(response: Response): Promise<FriendlinessOutcome> {
+async function parseContent(response: Response, language: Language): Promise<FriendlinessOutcome> {
   let text: string
   try {
     text = await response.text()
   } catch {
-    return failure("پاسخ سرور قابل خواندن به‌صورت JSON نبود.")
+    return failure("پاسخ سرور قابل خواندن به‌صورت JSON نبود.", language)
   }
 
   let payload: unknown
@@ -104,13 +130,13 @@ async function parseContent(response: Response): Promise<FriendlinessOutcome> {
     try {
       payload = JSON.parse(fenced)
     } catch {
-      return failure("پاسخ سرور قابل خواندن به‌صورت JSON نبود.")
+      return failure("پاسخ سرور قابل خواندن به‌صورت JSON نبود.", language)
     }
   }
 
   const content = contentText(payload)
   if (content === null) {
-    return failure("پاسخ سرور محتوای پیام نداشت.")
+    return failure("پاسخ سرور محتوای پیام نداشت.", language)
   }
 
   let parsed: unknown
@@ -121,7 +147,7 @@ async function parseContent(response: Response): Promise<FriendlinessOutcome> {
     try {
       parsed = JSON.parse(fenced)
     } catch {
-      return failure("مدل خروجی JSON معتبر نداد — دوباره تلاش کنید یا مدل را عوض کنید.")
+      return failure("مدل خروجی JSON معتبر نداد — دوباره تلاش کنید یا مدل را عوض کنید.", language)
     }
   }
 
@@ -134,10 +160,13 @@ async function parseContent(response: Response): Promise<FriendlinessOutcome> {
     typeof candidate.rationale !== "string" ||
     candidate.rationale.trim() === ""
   ) {
-    return failure("مدل نمره یا توضیح نامعتبر داد — دوباره تلاش کنید یا مدل را عوض کنید.")
+    return failure("مدل نمره یا توضیح نامعتبر داد — دوباره تلاش کنید یا مدل را عوض کنید.", language)
   }
 
-  return { ok: true, result: { score: Math.round(candidate.score), rationale: candidate.rationale.trim() } }
+  return {
+    ok: true,
+    result: { score: Math.round(candidate.score), rationale: candidate.rationale.trim() },
+  }
 }
 
 function contentText(payload: unknown): string | null {
@@ -151,16 +180,18 @@ function contentText(payload: unknown): string | null {
 }
 
 /** Best-effort extraction of the endpoint's own error message, key-free. */
-async function apiErrorMessage(response: Response): Promise<string> {
+async function apiErrorMessage(response: Response, language: Language): Promise<string> {
   try {
     const body = (await response.json()) as { error?: { message?: unknown } }
     const message = body?.error?.message
-    return typeof message === "string" && message.length > 0 ? message : "درخواست ناموفق"
+    return typeof message === "string" && message.length > 0
+      ? message
+      : translate("درخواست ناموفق", language)
   } catch {
-    return "درخواست ناموفق"
+    return translate("درخواست ناموفق", language)
   }
 }
 
-function failure(error: string): FriendlinessOutcome {
-  return { ok: false, error }
+function failure(error: string, language: Language): FriendlinessOutcome {
+  return { ok: false, error: translate(error, language) }
 }

@@ -2,7 +2,7 @@
 
 An interactive game-theory laboratory for exploring cooperation, conflict and coalition formation between countries. Geo GameSim combines an interactive world map, language-model-generated scenario inputs, deterministic repeated games, exact pure Nash equilibrium search and a simple multi-agent learning baseline.
 
-The application has a Persian interface with right-to-left layout. The game engines are written in TypeScript and run locally in the browser after scenario inputs have been obtained.
+The application supports Persian (right-to-left) and English (left-to-right), with a language selector in the header and a saved language preference. The game engines are written in TypeScript and run locally in the browser after scenario inputs have been obtained.
 
 ## Features
 
@@ -10,7 +10,8 @@ The application has a Persian interface with right-to-left layout. The game engi
 - Explore bilateral cooperation through 50-round, Prisoner's-Dilemma-inspired games.
 - Analyze conflict scenarios with exact enumeration of alignment profiles and pure Nash equilibria.
 - Compare equilibrium results with 1,000 episodes of independent action-value learning.
-- Inspect round playback, cumulative payoffs, relationship trajectories, alignment tables and learning histories.
+- Inspect round playback, cumulative payoffs, relationship trajectories, alignment tables and learning histories in a dedicated results window.
+- Close results with the × button, Escape or the backdrop, and reopen them using **View results**. Requests can finish while the window is closed.
 - Configure an OpenAI-compatible language-model endpoint, with cached responses and per-request retry controls.
 - Run locally with Node.js or serve a production build using Docker Compose.
 
@@ -41,6 +42,8 @@ Open the settings panel using the gear icon and enter:
 | Base URL | An OpenAI-compatible API root; the default is `https://openrouter.ai/api/v1` |
 | API key | A key for the configured provider |
 | Model | A model identifier supported by that provider |
+
+Model rationales are requested in the selected language. Switching language keeps the selected countries and resets displayed results; rerun the experiment to obtain responses in the new language. Cached results are separated by provider, model and language.
 
 The client appends `/chat/completions` to the base URL and requests JSON output. The endpoint must support browser requests through CORS. No application backend or database is required.
 

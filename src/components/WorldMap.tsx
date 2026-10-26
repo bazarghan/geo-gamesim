@@ -1,3 +1,4 @@
+import { useLanguage } from "../useLanguage"
 import { useState } from "react"
 import type { Country } from "../domain/country"
 import { isSelected } from "../domain/selection"
@@ -29,6 +30,7 @@ type WorldMapProps = {
 }
 
 export default function WorldMap({ selected, onToggleCountry, belligerentIds }: WorldMapProps) {
+  const { t, countryName } = useLanguage()
   const [hovered, setHovered] = useState<Country | null>(null)
   const [cursor, setCursor] = useState<PlanarPoint>([0, 0])
 
@@ -42,8 +44,8 @@ export default function WorldMap({ selected, onToggleCountry, belligerentIds }: 
     >
       <svg
         viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
-        role="img"
-        aria-label="نقشه جهان — برای انتخاب کشورها روی آن‌ها کلیک کنید"
+        role="group"
+        aria-label={t("نقشه جهان — برای انتخاب کشورها روی آن‌ها کلیک کنید")}
       >
         <path className="ocean" d={mapPath({ type: "Sphere" }) ?? ""} />
         {renderedCountries.map(({ country, d }) => {
@@ -56,6 +58,16 @@ export default function WorldMap({ selected, onToggleCountry, belligerentIds }: 
               key={country.id}
               className={classes.join(" ")}
               d={d}
+              role="button"
+              tabIndex={0}
+              aria-label={countryName(country.name)}
+              aria-pressed={isSelected(selected, country)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault()
+                  onToggleCountry(country)
+                }
+              }}
               onMouseEnter={() => setHovered(country)}
               onMouseLeave={() => setHovered(null)}
               onClick={() => onToggleCountry(country)}
@@ -63,13 +75,8 @@ export default function WorldMap({ selected, onToggleCountry, belligerentIds }: 
           )
         })}
         {selectedWithAnchors.map(({ country, anchor }) => (
-          <text
-            key={`label-${country.id}`}
-            className="country-label"
-            x={anchor[0]}
-            y={anchor[1]}
-          >
-            {country.name}
+          <text key={`label-${country.id}`} className="country-label" x={anchor[0]} y={anchor[1]}>
+            {countryName(country.name)}
           </text>
         ))}
       </svg>
@@ -81,7 +88,7 @@ export default function WorldMap({ selected, onToggleCountry, belligerentIds }: 
             top: cursor[1] + 16,
           }}
         >
-          {hovered.name}
+          {countryName(hovered.name)}
         </div>
       )}
     </div>

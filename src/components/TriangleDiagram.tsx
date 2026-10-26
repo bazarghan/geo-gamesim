@@ -1,3 +1,4 @@
+import { useLanguage } from "../useLanguage"
 import type { Country } from "../domain/country"
 import { pairingId, pairingOf } from "../domain/pairing"
 import type { Simulation } from "../sim/engine"
@@ -42,6 +43,7 @@ const VERTEX_LABEL_OFFSETS = [
  * as an edge color-coded by its Verdict.
  */
 export default function TriangleDiagram({ countries, simulations }: TriangleDiagramProps) {
+  const { t, countryName } = useLanguage()
   const byPairingId = new Map(
     simulations.map((simulation) => [pairingId(simulation.pairing), simulation]),
   )
@@ -51,7 +53,7 @@ export default function TriangleDiagram({ countries, simulations }: TriangleDiag
       className="triangle-diagram"
       viewBox="0 0 320 272"
       role="img"
-      aria-label="مثلث سه کشور انتخاب‌شده با یال‌هایی که رنگشان وابسته به داوری هر جفت است"
+      aria-label={t("مثلث سه کشور انتخاب‌شده با یال‌هایی که رنگشان وابسته به داوری هر جفت است")}
     >
       {EDGES.map((edge, index) => {
         const from = VERTICES[edge.from]
@@ -65,7 +67,7 @@ export default function TriangleDiagram({ countries, simulations }: TriangleDiag
         const mid = { x: (from.x + to.x) / 2 + offset.dx, y: (from.y + to.y) / 2 + offset.dy }
         return (
           <g key={`${edge.from}-${edge.to}`}>
-            <title>{`${simulation.pairing.left.name} — ${simulation.pairing.right.name}: ${verdictLabel(simulation.verdict)}`}</title>
+            <title>{`${countryName(simulation.pairing.left.name)} — ${countryName(simulation.pairing.right.name)}: ${t(verdictLabel(simulation.verdict))}`}</title>
             <line
               x1={from.x}
               y1={from.y}
@@ -82,7 +84,7 @@ export default function TriangleDiagram({ countries, simulations }: TriangleDiag
               className="triangle-edge-label"
               fill={color}
             >
-              {verdictLabel(simulation.verdict)}
+              {t(verdictLabel(simulation.verdict))}
             </text>
           </g>
         )
@@ -99,7 +101,7 @@ export default function TriangleDiagram({ countries, simulations }: TriangleDiag
               textAnchor="middle"
               className="triangle-vertex-label"
             >
-              {country.name}
+              {countryName(country.name)}
             </text>
           </g>
         )

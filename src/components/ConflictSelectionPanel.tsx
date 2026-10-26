@@ -1,3 +1,4 @@
+import { useLanguage } from "../useLanguage"
 import type { Country } from "../domain/country"
 import {
   BELLIGERENT_COUNT,
@@ -14,6 +15,7 @@ export type ConflictPartyStatus =
   | { readonly state: "error"; readonly error: string }
 
 type ConflictSelectionPanelProps = {
+  readonly pending?: boolean
   readonly selected: readonly Country[]
   readonly statuses: Readonly<Record<string, ConflictPartyStatus>>
   readonly onDeselect: (country: Country) => void
@@ -22,28 +24,36 @@ type ConflictSelectionPanelProps = {
 }
 
 export default function ConflictSelectionPanel({
+  pending = false,
   selected,
   statuses,
   onDeselect,
   onRunAnalysis,
   onRetryParty,
 }: ConflictSelectionPanelProps) {
+  const { t, countryName } = useLanguage()
   return (
     <aside className="selection-panel">
-      <h2>سناریوی درگیری</h2>
+      <h2>{t("سناریوی درگیری")}</h2>
       <p className="selection-count">
-        {selected.length} از {CONFLICT_LIMIT} کشور
+        {t("{count} از {limit} کشور", { count: selected.length, limit: CONFLICT_LIMIT })}
       </p>
 
       {selected.length === 0 && (
-        <p className="hint">دو طرف درگیر را انتخاب کنید، سپس طرف‌هایی که ممکن است جانب یکی را بگیرند اضافه کنید.</p>
+        <p className="hint">
+          {t(
+            "دو طرف درگیر را انتخاب کنید، سپس طرف‌هایی که ممکن است جانب یکی را بگیرند اضافه کنید.",
+          )}
+        </p>
       )}
-      {selected.length === 1 && <p className="hint">یک طرف درگیر دیگر انتخاب کنید.</p>}
+      {selected.length === 1 && <p className="hint">{t("یک طرف درگیر دیگر انتخاب کنید.")}</p>}
       {selected.length === BELLIGERENT_COUNT && (
-        <p className="hint">برای اجرای تحلیل درگیری حداقل یک طرف دیگر اضافه کنید.</p>
+        <p className="hint">{t("برای اجرای تحلیل درگیری حداقل یک طرف دیگر اضافه کنید.")}</p>
       )}
       {selected.length >= CONFLICT_LIMIT && (
-        <p className="hint">انتخاب کامل است — برای جایگزینی روی یک کشور انتخاب‌شده کلیک کنید.</p>
+        <p className="hint">
+          {t("انتخاب کامل است — برای جایگزینی روی یک کشور انتخاب‌شده کلیک کنید.")}
+        </p>
       )}
 
       <ul className="chips">
@@ -56,17 +66,17 @@ export default function ConflictSelectionPanel({
                 type="button"
                 className="chip"
                 onClick={() => onDeselect(country)}
-                aria-label={`حذف ${country.name}`}
+                aria-label={t("حذف {name}", { name: countryName(country.name) })}
               >
-                {country.name}
+                {countryName(country.name)}
                 <span className={`role-badge role-${role}`}>
-                  {role === "belligerent" ? "طرف درگیر" : "طرف"}
+                  {role === "belligerent" ? t("طرف درگیر") : t("طرف")}
                 </span>
                 <span aria-hidden="true">×</span>
               </button>
               {status?.state === "loading" && (
                 <p className="pairing-status" role="status">
-                  در حال پرسش از مدل…
+                  {t("در حال پرسش از مدل…")}
                 </p>
               )}
               {status?.state === "done" && (
@@ -77,10 +87,10 @@ export default function ConflictSelectionPanel({
                       {status.result.parameters.affinitySideB}
                     </span>
                     <span>
-                      بی‌طرفی: {status.result.parameters.neutralityValue} · قدرت:{" "}
+                      {t("بی‌طرفی")}: {status.result.parameters.neutralityValue} · {t("قدرت")}:{" "}
                       {status.result.parameters.powerWeight}
                     </span>
-                    {status.cached && <span className="cached-badge">از حافظه</span>}
+                    {status.cached && <span className="cached-badge">{t("از حافظه")}</span>}
                   </p>
                   <p className="pairing-rationale">{status.result.rationale}</p>
                 </div>
@@ -93,7 +103,7 @@ export default function ConflictSelectionPanel({
                     className="retry-button"
                     onClick={() => onRetryParty(country)}
                   >
-                    تلاش مجدد
+                    {t("تلاش مجدد")}
                   </button>
                 </div>
               )}
@@ -105,10 +115,10 @@ export default function ConflictSelectionPanel({
       <button
         type="button"
         className="run-button"
-        disabled={!canRunConflictAnalysis(selected)}
+        disabled={pending || !canRunConflictAnalysis(selected)}
         onClick={onRunAnalysis}
       >
-        اجرای تحلیل درگیری
+        {t("اجرای تحلیل درگیری")}
       </button>
     </aside>
   )

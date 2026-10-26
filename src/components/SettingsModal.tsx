@@ -1,3 +1,4 @@
+import { useLanguage } from "../useLanguage"
 import { useEffect, useState, type FormEvent } from "react"
 import { DEFAULT_BASE_URL, type Settings } from "../settings/settings"
 
@@ -14,6 +15,7 @@ export default function SettingsModal({
   onClose,
   onClearCache,
 }: SettingsModalProps) {
+  const { t } = useLanguage()
   const [baseUrl, setBaseUrl] = useState(settings.baseUrl)
   const [apiKey, setApiKey] = useState(settings.apiKey)
   const [model, setModel] = useState(settings.model)
@@ -46,10 +48,10 @@ export default function SettingsModal({
         aria-labelledby="settings-title"
         onClick={(event) => event.stopPropagation()}
       >
-        <h2 id="settings-title">تنظیمات</h2>
+        <h2 id="settings-title">{t("تنظیمات")}</h2>
         <form onSubmit={handleSubmit} autoComplete="off">
           <div className="modal-field">
-            <label htmlFor="settings-base-url">آدرس پایه</label>
+            <label htmlFor="settings-base-url">{t("آدرس پایه")}</label>
             <input
               id="settings-base-url"
               type="text"
@@ -64,7 +66,7 @@ export default function SettingsModal({
           </div>
 
           <div className="modal-field">
-            <label htmlFor="settings-api-key">کلید API</label>
+            <label htmlFor="settings-api-key">{t("کلید API")}</label>
             <input
               id="settings-api-key"
               type="password"
@@ -78,7 +80,7 @@ export default function SettingsModal({
           </div>
 
           <div className="modal-field">
-            <label htmlFor="settings-model">نام مدل</label>
+            <label htmlFor="settings-model">{t("نام مدل")}</label>
             <input
               id="settings-model"
               type="text"
@@ -93,19 +95,19 @@ export default function SettingsModal({
 
           <div className="modal-actions">
             <button type="button" className="ghost-button" onClick={onClearCache}>
-              پاک کردن نتایج حافظه
+              {t("پاک کردن نتایج حافظه")}
             </button>
             <button type="button" className="ghost-button" onClick={onClose}>
-              بستن
+              {t("بستن")}
             </button>
             <button type="submit" className="save-button">
-              ذخیره
+              {t("ذخیره")}
             </button>
           </div>
 
           {saved && (
             <p className="saved-feedback" role="status">
-              تنظیمات ذخیره شد
+              {t("تنظیمات ذخیره شد")}
             </p>
           )}
         </form>

@@ -1,3 +1,4 @@
+import { useLanguage } from "../useLanguage"
 import { useEffect, useMemo, useState } from "react"
 import {
   Bar,
@@ -33,6 +34,7 @@ type PairingPlaybackProps = {
  * Friendliness Score, ending in the Pairing's Verdict.
  */
 export default function PairingPlayback({ simulation, rationale }: PairingPlaybackProps) {
+  const { t, countryName, language } = useLanguage()
   const [currentRound, setCurrentRound] = useState(1)
   const [playing, setPlaying] = useState(false)
   const [speedIndex, setSpeedIndex] = useState(1)
@@ -49,7 +51,10 @@ export default function PairingPlayback({ simulation, rationale }: PairingPlayba
     return () => window.clearInterval(id)
   }, [playing, atEnd, speedIndex, currentRound])
 
-  const data = useMemo(() => trajectoryData(simulation, currentRound), [simulation, currentRound])
+  const data = useMemo(
+    () => trajectoryData(simulation, currentRound, language),
+    [simulation, currentRound, language],
+  )
   const round = simulation.rounds[currentRound - 1]
   const { left, right } = simulation.pairing
 
@@ -68,18 +73,26 @@ export default function PairingPlayback({ simulation, rationale }: PairingPlayba
   }
 
   return (
-    <article className="playback-card" aria-label={`پخش شبیه‌سازی برای ${left.name} و ${right.name}`}>
+    <article
+      className="playback-card"
+      aria-label={t("پخش شبیه‌سازی برای {left} و {right}", {
+        left: countryName(left.name),
+        right: countryName(right.name),
+      })}
+    >
       <header className="playback-header">
         <div>
           <h3 className="playback-name">
-            {left.name} — {right.name}
+            {countryName(left.name)} — {countryName(right.name)}
           </h3>
           <p className="playback-score">
-            امتیاز اولیه {simulation.initialScore} · نهایی {simulation.finalScore}
+            {t("امتیاز اولیه")} {simulation.initialScore} · {t("نهایی")} {simulation.finalScore}
           </p>
         </div>
-        <span className={`verdict-badge verdict-${simulation.verdict.toLowerCase().replaceAll(" ", "-")}`}>
-          {verdictLabel(simulation.verdict)}
+        <span
+          className={`verdict-badge verdict-${simulation.verdict.toLowerCase().replaceAll(" ", "-")}`}
+        >
+          {t(verdictLabel(simulation.verdict))}
         </span>
       </header>
 
@@ -104,7 +117,7 @@ export default function PairingPlayback({ simulation, rationale }: PairingPlayba
               tick={{ fontSize: 11, fill: "#8ba0c0" }}
             />
             <YAxis yAxisId="moves" domain={[0, 4]} hide />
-            <Tooltip content={roundTooltip} cursor={{ fill: "rgba(245, 165, 36, 0.08)" }} />
+            <Tooltip content={<RoundTooltip />} cursor={{ fill: "rgba(245, 165, 36, 0.08)" }} />
             <Bar yAxisId="moves" dataKey="move" barSize={4} isAnimationActive={false}>
               {data.map((datum) => (
                 <Cell key={datum.round} fill={OUTCOME_COLORS[datum.outcome]} />
@@ -123,9 +136,10 @@ export default function PairingPlayback({ simulation, rationale }: PairingPlayba
       </div>
 
       <p className="playback-round" role="status">
-        دور {currentRound}/{ROUND_COUNT} — {detailFor(simulation, round)} · امتیاز {round.scoreAfter} ·{" "}
-        {archetypeLabel(round.archetype)} · {left.name} {round.leftTotal} امتیاز، {right.name}{" "}
-        {round.rightTotal} امتیاز
+        {t("دور")} {currentRound}/{ROUND_COUNT} — {detailFor(simulation, round, language)} ·{" "}
+        {t("امتیاز")} {round.scoreAfter} · {t(archetypeLabel(round.archetype))} ·{" "}
+        {countryName(left.name)} {round.leftTotal} {t("امتیازها")} · {countryName(right.name)}{" "}
+        {round.rightTotal} {t("امتیازها")}
       </p>
 
       <div className="playback-controls">
@@ -133,18 +147,23 @@ export default function PairingPlayback({ simulation, rationale }: PairingPlayba
           type="button"
           className="play-button"
           onClick={togglePlay}
-          aria-label={playingNow ? "توقف پخش" : atEnd ? "پخش مجدد" : "پخش"}
+          aria-label={playingNow ? t("توقف پخش") : atEnd ? t("پخش مجدد") : t("پخش")}
         >
-          {playingNow ? "توقف" : atEnd ? "پخش مجدد" : "پخش"}
+          {playingNow ? t("توقف") : atEnd ? t("پخش مجدد") : t("پخش")}
         </button>
-        <button type="button" className="ghost-button" onClick={reset} aria-label="بازنشانی پخش">
-          بازنشانی
+        <button
+          type="button"
+          className="ghost-button"
+          onClick={reset}
+          aria-label={t("بازنشانی پخش")}
+        >
+          {t("بازنشانی")}
         </button>
         <label className="speed-label">
-          سرعت
+          {t("سرعت")}
           <select
             className="speed-select"
-            aria-label="سرعت پخش"
+            aria-label={t("سرعت پخش")}
             value={speedIndex}
             onChange={(event) => setSpeedIndex(Number(event.target.value))}
           >
@@ -162,18 +181,18 @@ export default function PairingPlayback({ simulation, rationale }: PairingPlayba
           max={ROUND_COUNT}
           step={1}
           value={currentRound}
-          aria-label="مرور دورها"
+          aria-label={t("مرور دورها")}
           onChange={(event) => setCurrentRound(Number(event.target.value))}
         />
       </div>
 
       <p className="playback-legend">
         <span className="legend-dot" style={{ background: OUTCOME_COLORS["mutual cooperation"] }} />
-        {outcomeLabel("mutual cooperation")}
+        {t(outcomeLabel("mutual cooperation"))}
         <span className="legend-dot" style={{ background: OUTCOME_COLORS.mixed }} />
-        {outcomeLabel("mixed")}
+        {t(outcomeLabel("mixed"))}
         <span className="legend-dot" style={{ background: OUTCOME_COLORS["mutual defection"] }} />
-        {outcomeLabel("mutual defection")}
+        {t(outcomeLabel("mutual defection"))}
       </p>
     </article>
   )
@@ -184,15 +203,20 @@ type RoundTooltipProps = {
   readonly payload?: readonly { readonly payload?: unknown }[]
 }
 
-function roundTooltip(props: RoundTooltipProps) {
+function RoundTooltip(props: RoundTooltipProps) {
+  const { t } = useLanguage()
   if (!props.active) return null
   const datum = props.payload?.[0]?.payload as TrajectoryDatum | undefined
   if (!datum) return null
   return (
     <div className="round-tooltip">
-      <p className="round-tooltip-title">دور {datum.round}</p>
+      <p className="round-tooltip-title">
+        {t("دور")} {datum.round}
+      </p>
       <p>{datum.detail}</p>
-      <p>امتیاز {datum.score}</p>
+      <p>
+        {t("امتیاز")} {datum.score}
+      </p>
     </div>
   )
 }
