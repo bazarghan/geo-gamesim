@@ -4,6 +4,22 @@ An interactive game-theory laboratory for exploring cooperation, conflict and co
 
 The application supports Persian (right-to-left) and English (left-to-right), with a language selector in the header and a saved language preference. The game engines are written in TypeScript and run locally in the browser after scenario inputs have been obtained.
 
+## Screenshots
+
+Captured from the running application in English. These examples use illustrative scenario inputs; round trajectories, payoffs, equilibria and learning histories are calculated by the game engines.
+
+**Interactive world map** — select countries and switch between bilateral and conflict modes.
+
+![Geo GameSim world map with France and Germany selected](docs/screenshots/world-map.png)
+
+**Bilateral simulation** — the completed 50-round trajectory, cooperation and defection history, final verdict and playback controls inside the results window.
+
+![Completed 50-round bilateral simulation with score trajectory and playback controls](docs/screenshots/bilateral-simulation.png)
+
+**Conflict analysis** — party alignments, an exact Nash equilibrium and the 1,000-episode multi-agent learning history.
+
+![Conflict analysis showing alignments, a Nash equilibrium and the MARL convergence chart](docs/screenshots/conflict-analysis.png)
+
 ## Features
 
 - Select countries on a world map built from Natural Earth 110m data.
